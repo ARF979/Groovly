@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/abdulfarooqui/Desktop/Frontend/groovly-landing/app/layout\":[\"static/media/e4af272ccee01ff0-s.p.woff2\",\"static/media/0484562807a97172-s.p.woff2\",\"static/media/b957ea75a84b6ea7-s.p.woff2\",\"static/media/7db6c35d839a711c-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"
