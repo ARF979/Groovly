@@ -1,0 +1,267 @@
+const Song = require('../models/Song');
+const Room = require('../models/Room');
+const { SONG_STATUS } = require('../config/constants');
+
+// @desc    Add song to room queue
+// @route   POST /api/rooms/:roomId/songs
+// @access  Private (Members only)
+exports.addSong = async (req, res, next) => {
+  try {
+    const { spotifyId, title, artist, album, albumArt, durationMs, previewUrl } = req.body;
+    const room = req.room;
+
+    // Check if duplicates are allowed
+    if (!room.settings.allowDuplicates) {
+      const existingSong = await Song.findOne({
+        room: room._id,
+        spotifyId,
+        status: SONG_STATUS.QUEUED
+      });
+
+      if (existingSong) {
+        return res.status(400).json({
+          success: false,
+          message: 'This song is already in the queue'
+        });
+      }
+    }
+
+    // Check max songs per user
+    const userSongsCount = await Song.countDocuments({
+      room: room._id,
+      addedBy: req.user._id,
+      status: SONG_STATUS.QUEUED
+    });
+
+    if (userSongsCount >= room.settings.maxSongsPerUser) {
+      return res.status(400).json({
+        success: false,
+        message: `You can only have ${room.settings.maxSongsPerUser} songs in the queue at a time`
+      });
+    }
+
+    // Check max queue size
+    const queueSize = await Song.countDocuments({
+      room: room._id,
+      status: SONG_STATUS.QUEUED
+    });
+
+    if (queueSize >= room.settings.maxQueueSize) {
+      return res.status(400).json({
+        success: false,
+        message: 'Queue is full'
+      });
+    }
+
+    // Create song
+    const song = await Song.create({
+      spotifyId,
+      title,
+      artist,
+      album,
+      albumArt,
+      durationMs,
+      previewUrl,
+      addedBy: req.user._id,
+      room: room._id
+    });
+
+    const populatedSong = await Song.findById(song._id)
+      .populate('addedBy', 'name avatarUrl');
+
+    res.status(201).json({
+      success: true,
+      message: 'Song added to queue',
+      data: populatedSong
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upvote a song
+// @route   POST /api/rooms/:roomId/songs/:songId/upvote
+// @access  Private (Members only)
+exports.upvoteSong = async (req, res, next) => {
+  try {
+    const song = await Song.findById(req.params.songId);
+
+    if (!song) {
+      return res.status(404).json({
+        success: false,
+        message: 'Song not found'
+      });
+    }
+
+    if (song.status !== SONG_STATUS.QUEUED) {
+      return res.status(400).json({
+        success: false,
+        message: 'Can only vote on queued songs'
+      });
+    }
+
+    const userId = req.user._id;
+    const hasUpvoted = song.upvotes.includes(userId);
+    const hasDownvoted = song.downvotes.includes(userId);
+
+    if (hasUpvoted) {
+      // Remove upvote
+      song.upvotes = song.upvotes.filter(id => id.toString() !== userId.toString());
+    } else {
+      // Add upvote and remove downvote if exists
+      if (hasDownvoted) {
+        song.downvotes = song.downvotes.filter(id => id.toString() !== userId.toString());
+      }
+      song.upvotes.push(userId);
+    }
+
+    await song.save();
+
+    const populatedSong = await Song.findById(song._id)
+      .populate('addedBy', 'name avatarUrl');
+
+    res.status(200).json({
+      success: true,
+      data: populatedSong
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Downvote a song
+// @route   POST /api/rooms/:roomId/songs/:songId/downvote
+// @access  Private (Members only)
+exports.downvoteSong = async (req, res, next) => {
+  try {
+    const song = await Song.findById(req.params.songId);
+
+    if (!song) {
+      return res.status(404).json({
+        success: false,
+        message: 'Song not found'
+      });
+    }
+
+    if (song.status !== SONG_STATUS.QUEUED) {
+      return res.status(400).json({
+        success: false,
+        message: 'Can only vote on queued songs'
+      });
+    }
+
+    const userId = req.user._id;
+    const hasUpvoted = song.upvotes.includes(userId);
+    const hasDownvoted = song.downvotes.includes(userId);
+
+    if (hasDownvoted) {
+      // Remove downvote
+      song.downvotes = song.downvotes.filter(id => id.toString() !== userId.toString());
+    } else {
+      // Add downvote and remove upvote if exists
+      if (hasUpvoted) {
+        song.upvotes = song.upvotes.filter(id => id.toString() !== userId.toString());
+      }
+      song.downvotes.push(userId);
+    }
+
+    await song.save();
+
+    const populatedSong = await Song.findById(song._id)
+      .populate('addedBy', 'name avatarUrl');
+
+    res.status(200).json({
+      success: true,
+      data: populatedSong
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Skip a song
+// @route   POST /api/rooms/:roomId/songs/:songId/skip
+// @access  Private (Members only)
+exports.skipSong = async (req, res, next) => {
+  try {
+    const song = await Song.findById(req.params.songId);
+    const room = req.room;
+
+    if (!song) {
+      return res.status(404).json({
+        success: false,
+        message: 'Song not found'
+      });
+    }
+
+    // Check if user is host or skip threshold is met
+    const isHost = room.isHost(req.user._id);
+    const skipVotes = song.downvotes.length;
+    const totalMembers = room.members.length;
+    const skipThreshold = (room.settings.skipThreshold / 100) * totalMembers;
+
+    if (!isHost && skipVotes < skipThreshold) {
+      return res.status(400).json({
+        success: false,
+        message: `Need ${Math.ceil(skipThreshold)} skip votes. Current: ${skipVotes}`
+      });
+    }
+
+    // Mark song as skipped
+    song.status = SONG_STATUS.SKIPPED;
+    song.playedAt = new Date();
+    await song.save();
+
+    // Clear current song if this was playing
+    if (room.currentSong && room.currentSong.toString() === song._id.toString()) {
+      room.currentSong = null;
+      room.playbackState.isPlaying = false;
+      await room.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Song skipped',
+      data: song
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove song from queue
+// @route   DELETE /api/rooms/:roomId/songs/:songId
+// @access  Private (Song owner or Host)
+exports.removeSong = async (req, res, next) => {
+  try {
+    const song = await Song.findById(req.params.songId);
+    const room = req.room;
+
+    if (!song) {
+      return res.status(404).json({
+        success: false,
+        message: 'Song not found'
+      });
+    }
+
+    // Check if user is song owner or host
+    const isOwner = song.addedBy.toString() === req.user._id.toString();
+    const isHost = room.isHost(req.user._id);
+
+    if (!isOwner && !isHost) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to remove this song'
+      });
+    }
+
+    await song.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: 'Song removed from queue'
+    });
+  } catch (error) {
+    next(error);
+  }
+};

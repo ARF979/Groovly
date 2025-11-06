@@ -1,0 +1,7 @@
+curl -X POST http://localhost:5001/api/rooms \
+  -H "Content-Type: application/json" \
+  -H "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MGNhNTRhOWU4YjQ0OTcxZDlhNjQ5MyIsImlhdCI6MTc2MjQzNjQ1NywiZXhwIjoxNzYzMDQxMjU3fQ.G3z2o51CCqD5RQDgnExzRdQa-kjZ3_K-hvKtztmdoGg" \
+  -d '{
+    "name": "My First Room",
+    "mode": "democratic"
+  }'
