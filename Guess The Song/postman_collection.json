@@ -1,0 +1,285 @@
+{
+  "info": {
+    "name": "Guess The Song API",
+    "description": "API endpoints for Guess The Song game mode",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "room_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "room_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Game Management",
+      "item": [
+        {
+          "name": "Create Game Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Game Room\",\n  \"playlistId\": \"37i9dQZF1DXcBWIGoYBM5M\",\n  \"roundCount\": 10,\n  \"clipDuration\": 20,\n  \"questionTime\": 20\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms"]
+            }
+          }
+        },
+        {
+          "name": "Get Game Room by Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms/{{room_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms", "{{room_code}}"]
+            }
+          }
+        },
+        {
+          "name": "Join Game Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"Player1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms/{{room_code}}/join",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms", "{{room_code}}", "join"]
+            }
+          }
+        },
+        {
+          "name": "Start Game (Host Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms/{{room_id}}/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms", "{{room_id}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "Submit Answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answer\": \"Song Title Here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms/{{room_id}}/answer",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms", "{{room_id}}", "answer"]
+            }
+          }
+        },
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms/{{room_id}}/leaderboard",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms", "{{room_id}}", "leaderboard"]
+            }
+          }
+        },
+        {
+          "name": "Leave Game Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/game/rooms/{{room_id}}/leave",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "rooms", "{{room_id}}", "leave"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spotify Integration",
+      "item": [
+        {
+          "name": "Search Playlists",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/game/playlists/search?query=top hits&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "game", "playlists", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "top hits"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Server Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "Root Endpoint",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
