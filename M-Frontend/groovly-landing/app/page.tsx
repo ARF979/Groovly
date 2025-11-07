@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CD } from "@/components/CD";
+import { StarField } from "@/components/StarField";
 
 const cdData = [
   { src: "/assets/cd1.jpg", alt: "Groovify your night" },
@@ -11,13 +12,9 @@ const cdData = [
 
 export default function Page() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black">
-      {/* Gradient overlays - more subtle */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_rgba(139,92,246,0.12),_transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(236,72,153,0.08),_transparent_60%)]" />
-      
-      {/* Subtle noise texture */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.015]" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg viewBox=%270 0 256 256%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27noiseFilter%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23noiseFilter)%27/%3E%3C/svg%3E')" }} />
+    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(ellipse_at_bottom,#1B2735_0%,#090A0F_100%)]">
+      {/* Parallax Star Field Background */}
+      <StarField />
       
       <div className="relative z-10">
         {/* Navbar */}
@@ -42,17 +39,11 @@ export default function Page() {
         <header className="mx-auto flex max-w-7xl flex-col gap-16 px-6 pb-20 pt-12 md:px-10 lg:px-16">
           <div className="flex flex-col items-center gap-10 text-center">
             {/* Main heading */}
-            <h1 className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl lg:text-8xl">
-              Groovly is the new
+            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white md:text-7xl lg:text-8xl">
+              <span className="font-imperial">Groovly</span> <span className="font-display whitespace-nowrap">is the new</span>
               <br />
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-300 bg-clip-text text-transparent">
-                standard for collaboration
-              </span>
+              <span className="font-display bg-gradient-to-r from-purple-400 via-pink-400 to-orange-300 bg-clip-text text-transparent whitespace-nowrap">standard for collaboration</span>
             </h1>
-            
-            <p className="max-w-2xl text-balance text-lg leading-relaxed text-muted md:text-xl">
-              Chat, code, cloud, deployments, and more.
-            </p>
           </div>
           
           {/* Scattered CD Layout */}

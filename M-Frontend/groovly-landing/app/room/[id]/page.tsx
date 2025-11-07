@@ -7,6 +7,7 @@ import api, { handleApiError } from '@/lib/api';
 import socketService from '@/lib/socket';
 import { API_ENDPOINTS, SOCKET_EVENTS } from '@/config/constants';
 import { Room, Song, User } from '@/types';
+import { useYouTubePlayer } from '@/hooks/useYouTubePlayer';
 
 export default function RoomPage() {
   const router = useRouter();
@@ -249,7 +250,7 @@ export default function RoomPage() {
             {/* Queue Section - Main */}
             <div className="lg:col-span-2 space-y-6">
               {/* Now Playing */}
-              <NowPlaying room={room} isHost={!!isHost} queue={queue} />
+              <NowPlaying room={room} isHost={!!isHost} queue={queue} user={user} />
 
               {/* Add Song Button */}
               <div className="flex justify-between items-center">
@@ -284,73 +285,148 @@ export default function RoomPage() {
 }
 
 // Now Playing Component
-function NowPlaying({ room, isHost, queue }: { room: Room; isHost: boolean; queue: Song[] }) {
+function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean; queue: Song[]; user: User | null }) {
   const currentSong = room.currentSong as Song | null;
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  
+  // Initialize YouTube Player for host
+  const youtubePlayer = useYouTubePlayer(isHost, room._id);
+  
+  // Track playback state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // Initialize audio element when currentSong changes
+  // Play song with YouTube when it changes
   useEffect(() => {
-    if (currentSong?.previewUrl) {
-      const audioElement = new Audio(currentSong.previewUrl);
-      
-      audioElement.addEventListener('loadedmetadata', () => {
-        setDuration(audioElement.duration);
-      });
-      
-      audioElement.addEventListener('timeupdate', () => {
-        setCurrentTime(audioElement.currentTime);
-      });
-      
-      audioElement.addEventListener('ended', () => {
-        setIsPlaying(false);
-        // Auto-play next song if host and queue has songs
-        if (isHost && queue.length > 0) {
-          handlePlayNext();
-        }
-      });
-      
-      setAudio(audioElement);
-      
-      return () => {
-        audioElement.pause();
-        audioElement.src = '';
-      };
-    } else {
-      setAudio(null);
-      setIsPlaying(false);
+    if (!isHost || !currentSong || !youtubePlayer.isReady) return;
+
+    if (currentSong.youtubeId) {
+      console.log('Playing with YouTube:', currentSong.youtubeId);
+      youtubePlayer.playVideo(currentSong.youtubeId, 0);
     }
-  }, [currentSong?.previewUrl]);
+  }, [currentSong?.youtubeId, isHost, youtubePlayer.isReady]);
+
+  // Sync YouTube player state
+  useEffect(() => {
+    if (!isHost || !youtubePlayer.isReady) return;
+
+    setIsPlaying(youtubePlayer.isPlaying);
+    setCurrentTime(youtubePlayer.currentTime);
+    setDuration(youtubePlayer.duration);
+
+    // Broadcast to members
+    if (isHost) {
+      socketService.emit('playback-update', {
+        roomId: room._id,
+        duration: youtubePlayer.duration,
+        currentTime: youtubePlayer.currentTime,
+        isPlaying: youtubePlayer.isPlaying
+      });
+    }
+  }, [youtubePlayer.isPlaying, youtubePlayer.currentTime, youtubePlayer.duration, isHost, room._id]);
+
+  // Listen for playback updates from host (ONLY for members)
+  useEffect(() => {
+    if (isHost) return; // Host doesn't need to listen
+
+    const handlePlaybackUpdate = (data: any) => {
+      setDuration(data.duration);
+      setCurrentTime(data.currentTime);
+      setIsPlaying(data.isPlaying);
+    };
+
+    socketService.on('playback-update', handlePlaybackUpdate);
+
+    return () => {
+      socketService.off('playback-update', handlePlaybackUpdate);
+    };
+  }, [isHost]);
+
+  // Listen for member commands (ONLY for host)
+  useEffect(() => {
+    if (!isHost || !youtubePlayer.isReady) return;
+
+    const handleHostPlayCommand = (data: any) => {
+      console.log(`${data.from} requested play`);
+      youtubePlayer.resume();
+      setIsPlaying(true);
+    };
+
+    const handleHostPauseCommand = (data: any) => {
+      console.log(`${data.from} requested pause`);
+      youtubePlayer.pause();
+      setIsPlaying(false);
+    };
+
+    socketService.on('host-play-command', handleHostPlayCommand);
+    socketService.on('host-pause-command', handleHostPauseCommand);
+
+    return () => {
+      socketService.off('host-play-command', handleHostPlayCommand);
+      socketService.off('host-pause-command', handleHostPauseCommand);
+    };
+  }, [isHost, youtubePlayer]);
 
   const handlePlay = () => {
-    if (audio) {
-      audio.play();
+    if (isHost && youtubePlayer.isReady) {
+      // Check if we need to load a video or just resume
+      if (currentSong?.youtubeId) {
+        // If no video is currently loaded or it's a different video, load it
+        if (!youtubePlayer.currentVideoId || youtubePlayer.currentVideoId !== currentSong.youtubeId) {
+          console.log('Loading and playing video:', currentSong.youtubeId);
+          youtubePlayer.playVideo(currentSong.youtubeId, 0);
+        } else {
+          // Same video, just resume
+          console.log('Resuming current video');
+          youtubePlayer.resume();
+        }
+      } else {
+        // Just resume
+        youtubePlayer.resume();
+      }
       setIsPlaying(true);
+      socketService.emit('playback-update', {
+        roomId: room._id,
+        duration: youtubePlayer.duration,
+        currentTime: youtubePlayer.currentTime,
+        isPlaying: true
+      });
+    } else if (!isHost) {
+      // Members send command to host
+      socketService.emit('member-play', { roomId: room._id });
     }
   };
 
   const handlePause = () => {
-    if (audio) {
-      audio.pause();
+    if (isHost && youtubePlayer.isReady) {
+      // YouTube playback
+      youtubePlayer.pause();
       setIsPlaying(false);
+      socketService.emit('playback-update', {
+        roomId: room._id,
+        duration: youtubePlayer.duration,
+        currentTime: youtubePlayer.currentTime,
+        isPlaying: false
+      });
+    } else if (!isHost) {
+      // Members send command to host
+      socketService.emit('member-pause', { roomId: room._id });
     }
   };
 
   const handleSkip = async () => {
     if (currentSong) {
-      if (audio) {
-        audio.pause();
+      if (isHost && youtubePlayer.isReady) {
+        youtubePlayer.pause();
         setIsPlaying(false);
       }
+      
       socketService.emit(SOCKET_EVENTS.HOST_SKIP, {
         roomId: room._id,
         songId: currentSong._id,
       });
       
-      // Auto-play next song if queue is not empty
-      if (queue.length > 0) {
+      if (isHost && queue.length > 0) {
         setTimeout(() => handlePlayNext(), 500);
       }
     }
@@ -391,11 +467,41 @@ function NowPlaying({ room, isHost, queue }: { room: Room; isHost: boolean; queu
 
   return (
     <div className="rounded-2xl border border-white/10 bg-surface/40 backdrop-blur-xl p-6">
-      <div className="text-sm text-muted mb-3">Now Playing</div>
+      {/* YouTube Player Container - visible for host */}
+      {isHost && (
+        <div className="mb-4">
+          <div id={`youtube-player-${room._id}`} className="w-full aspect-video rounded-lg overflow-hidden"></div>
+        </div>
+      )}
+      
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-sm text-muted">Now Playing</div>
+        <div className="flex items-center gap-2">
+          {/* Show playback status */}
+          {isHost && youtubePlayer.isReady && (
+            <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+              YouTube Music (Full Song)
+            </div>
+          )}
+          {!isHost && (
+            <div className="flex items-center gap-2 text-xs text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full">
+              <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
+              Playing on host's device
+            </div>
+          )}
+          {isHost && youtubePlayer.isReady && (
+            <div className="flex items-center gap-2 text-xs text-green-400 bg-green-500/10 px-3 py-1 rounded-full">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              {isPlaying ? 'Playing locally' : 'Ready to play'}
+            </div>
+          )}
+        </div>
+      </div>
       <div className="flex gap-6">
-        {currentSong.albumArt && (
+        {currentSong.thumbnail && (
           <img
-            src={currentSong.albumArt}
+            src={currentSong.thumbnail}
             alt={currentSong.title}
             className="w-24 h-24 rounded-lg object-cover"
           />
@@ -405,50 +511,51 @@ function NowPlaying({ room, isHost, queue }: { room: Room; isHost: boolean; queu
           <p className="text-lg text-muted mb-4">{currentSong.artist}</p>
           
           {/* Audio Progress Bar */}
-          {currentSong.previewUrl ? (
-            <div className="mb-4">
-              <div className="w-full bg-gray-700 rounded-full h-1.5 mb-2">
-                <div
-                  className="bg-purple-500 h-1.5 rounded-full transition-all"
-                  style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-muted">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
+          <div className="mb-4">
+            <div className="w-full bg-gray-700 rounded-full h-1.5 mb-2">
+              <div
+                className="bg-purple-500 h-1.5 rounded-full transition-all"
+                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              />
             </div>
-          ) : (
-            <p className="text-sm text-yellow-400 mb-4">⚠️ No preview available</p>
-          )}
+            <div className="flex justify-between text-xs text-muted">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
 
           {/* Playback Controls */}
-          <div className="flex gap-3">
-            {isPlaying ? (
-              <button
-                onClick={handlePause}
-                disabled={!currentSong.previewUrl}
-                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                ⏸ Pause
-              </button>
-            ) : (
-              <button
-                onClick={handlePlay}
-                disabled={!currentSong.previewUrl}
-                className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                ▶ Play
-              </button>
+          <div className="space-y-2">
+            {!isHost && (
+              <div className="text-xs text-muted mb-2">
+                🎮 You're controlling the host's player
+              </div>
             )}
-            {isHost && (
-              <button
-                onClick={handleSkip}
-                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
-              >
-                ⏭ Skip
-              </button>
-            )}
+            <div className="flex gap-3">
+              {isPlaying ? (
+                <button
+                  onClick={handlePause}
+                  className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+                >
+                  ⏸ Pause
+                </button>
+              ) : (
+                <button
+                  onClick={handlePlay}
+                  className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
+                >
+                  ▶ Play
+                </button>
+              )}
+              {isHost && (
+                <button
+                  onClick={handleSkip}
+                  className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+                >
+                  ⏭ Skip
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -513,9 +620,9 @@ function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; room
                 #{index + 1}
               </div>
               
-              {song.albumArt && (
+              {song.thumbnail && (
                 <img
-                  src={song.albumArt}
+                  src={song.thumbnail}
                   alt={song.title}
                   className="w-14 h-14 rounded-lg object-cover"
                 />
@@ -615,7 +722,7 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
   const [selectedTrack, setSelectedTrack] = useState<any>(null);
   const [showOnlyWithPreview, setShowOnlyWithPreview] = useState(false);
 
-  // Search Spotify
+  // Search YouTube
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
@@ -623,17 +730,12 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
     setError('');
     
     try {
-      const response = await api.get(API_ENDPOINTS.SPOTIFY_SEARCH, {
+      const response = await api.get(API_ENDPOINTS.YOUTUBE_SEARCH, {
         params: { q: searchQuery, limit: 10 }
       });
       setSearchResults(response.data.data || []);
     } catch (err: any) {
-      // If Spotify not configured, show message
-      if (err.response?.status === 503) {
-        setError('Spotify not configured. Please add songs manually below.');
-      } else {
-        setError(handleApiError(err));
-      }
+      setError(handleApiError(err));
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -647,13 +749,11 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
 
     try {
       const songData = {
-        spotifyId: track.spotifyId,
+        youtubeId: track.youtubeId,
         title: track.title,
         artist: track.artist,
-        album: track.album || '',
-        albumArt: track.albumArt || '',
+        thumbnail: track.thumbnail || '',
         durationMs: track.durationMs,
-        previewUrl: track.previewUrl || '',
       };
 
       await api.post(API_ENDPOINTS.ADD_SONG(roomId), songData);
@@ -716,7 +816,7 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
             </button>
           </div>
           <p className="text-xs text-muted mt-2">
-            🎵 Search by song title, artist, or album. Not all songs have 30-second previews available.
+            🎵 Search by song title, artist, or album on YouTube Music
           </p>
         </div>
 
@@ -725,27 +825,16 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">Search Results</h3>
-              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showOnlyWithPreview}
-                  onChange={(e) => setShowOnlyWithPreview(e.target.checked)}
-                  className="rounded border-white/20 bg-black/40 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
-                />
-                Only show playable songs
-              </label>
             </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {searchResults
-                .filter(track => !showOnlyWithPreview || track.previewUrl)
-                .map((track) => (
+              {searchResults.map((track) => (
                 <div
-                  key={track.spotifyId}
+                  key={track.youtubeId}
                   className="flex items-center gap-4 p-3 rounded-lg bg-black/40 border border-white/10 hover:border-purple-500/50 transition group"
                 >
-                  {track.albumArt && (
+                  {track.thumbnail && (
                     <img
-                      src={track.albumArt}
+                      src={track.thumbnail}
                       alt={track.title}
                       className="w-14 h-14 rounded-lg object-cover"
                     />
@@ -753,19 +842,8 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="text-white font-medium truncate">{track.title}</h4>
-                      {!track.previewUrl && (
-                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full whitespace-nowrap">
-                          No Preview
-                        </span>
-                      )}
-                      {track.explicit && (
-                        <span className="text-xs bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded-full">
-                          E
-                        </span>
-                      )}
                     </div>
                     <p className="text-sm text-muted truncate">{track.artist}</p>
-                    <p className="text-xs text-muted truncate">{track.album}</p>
                   </div>
                   <button
                     onClick={() => handleAddSong(track)}

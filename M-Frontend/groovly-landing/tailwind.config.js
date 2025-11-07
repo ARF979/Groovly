@@ -17,7 +17,11 @@ module.exports = {
         "accent-secondary": "#ffa657",
       },
       fontFamily: {
-        display: ["Poppins", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Poppins", "Inter", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
+        lato: ["var(--font-lato)", "Lato", "sans-serif"],
+        imperial: ["var(--font-imperial)", "Imperial Script", "cursive"],
+        quicksand: ["var(--font-quicksand)", "Quicksand", "sans-serif"],
       },
       backgroundImage: {
         "noise-soft": "radial-gradient(circle at 20% 20%, rgba(255, 209, 102, 0.08), transparent 45%), radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 55%)",

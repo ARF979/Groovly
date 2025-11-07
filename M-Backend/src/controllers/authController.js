@@ -99,16 +99,24 @@ exports.login = async (req, res, next) => {
 // @access  Private
 exports.getMe = async (req, res, next) => {
   try {
-    let user = await User.findById(req.user._id);
+    let user = await User.findById(req.user._id)
+      .select('+spotifyExpiresAt');
     
     // Only populate activeRoom if it exists
     if (user.activeRoom) {
       user = await user.populate('activeRoom', 'name code');
     }
 
+    // Add Spotify connection status
+    const spotifyConnected = !!(user.spotifyId && user.spotifyExpiresAt && new Date() < user.spotifyExpiresAt);
+
+    const userData = user.toJSON();
+    userData.spotifyConnected = spotifyConnected;
+    userData.spotifyPremium = user.spotifyPremium;
+
     res.status(200).json({
       success: true,
-      data: user
+      data: userData
     });
   } catch (error) {
     next(error);

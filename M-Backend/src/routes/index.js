@@ -1,14 +1,14 @@
 const authRoutes = require("./authRoutes");
 const roomRoutes = require("./roomRoutes");
 const songRoutes = require("./songRoutes");
-const spotifyRoutes = require("./spotifyRoutes");
+const youtubeRoutes = require("./youtubeRoutes");
 
 module.exports = (app) => {
   // API Routes
   app.use("/api/auth", authRoutes);
   app.use("/api/rooms", roomRoutes);
   app.use("/api/rooms/:roomId/songs", songRoutes);
-  app.use("/api/spotify", spotifyRoutes);
+  app.use("/api/youtube", youtubeRoutes);
 
   // Health check
   app.get("/api/health", (req, res) => {
@@ -28,7 +28,7 @@ module.exports = (app) => {
       endpoints: {
         auth: "/api/auth",
         rooms: "/api/rooms",
-        spotify: "/api/spotify",
+        youtube: "/api/youtube",
         health: "/api/health",
       },
     });

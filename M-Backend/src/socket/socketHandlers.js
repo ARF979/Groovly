@@ -319,6 +319,47 @@ const setupSocketHandlers = (io) => {
       }
     });
 
+    // Member play command (relayed to host)
+    socket.on('member-play', async (data) => {
+      try {
+        const { roomId } = data;
+        // Relay to host - host's client will handle the actual playback
+        socket.to(roomId).emit('host-play-command', {
+          from: socket.user.name
+        });
+      } catch (error) {
+        console.error('Error relaying play command:', error);
+      }
+    });
+
+    // Member pause command (relayed to host)
+    socket.on('member-pause', async (data) => {
+      try {
+        const { roomId } = data;
+        // Relay to host - host's client will handle the actual playback
+        socket.to(roomId).emit('host-pause-command', {
+          from: socket.user.name
+        });
+      } catch (error) {
+        console.error('Error relaying pause command:', error);
+      }
+    });
+
+    // Playback update broadcast (from host to members)
+    socket.on('playback-update', async (data) => {
+      try {
+        const { roomId, duration, currentTime, isPlaying } = data;
+        // Broadcast to all other clients in the room
+        socket.to(roomId).emit('playback-update', {
+          duration,
+          currentTime,
+          isPlaying
+        });
+      } catch (error) {
+        console.error('Error broadcasting playback update:', error);
+      }
+    });
+
     // Disconnect
     socket.on('disconnect', () => {
       console.log(`User disconnected: ${socket.user.name} (${socket.id})`);

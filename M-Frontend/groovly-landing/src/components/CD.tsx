@@ -54,6 +54,7 @@ export function CD({ src, side, size = 310, alt = "CD artwork" }: CDProps) {
           alt={alt}
           fill
           priority
+          quality={100}
           sizes={`${size}px`}
           className="absolute inset-0 h-full w-full object-cover"
         />

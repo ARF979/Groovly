@@ -7,14 +7,25 @@ const { SONG_STATUS } = require('../config/constants');
 // @access  Private (Members only)
 exports.addSong = async (req, res, next) => {
   try {
-    const { spotifyId, title, artist, album, albumArt, durationMs, previewUrl } = req.body;
+    const { youtubeId, title, artist, thumbnail, durationMs } = req.body;
     const room = req.room;
+
+    // Log the received data for debugging
+    console.log('Adding song with data:', { youtubeId, title, artist, thumbnail, durationMs });
+
+    // Validate required fields
+    if (!youtubeId || !title || !artist || durationMs === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: youtubeId, title, artist, and durationMs are required'
+      });
+    }
 
     // Check if duplicates are allowed
     if (!room.settings.allowDuplicates) {
       const existingSong = await Song.findOne({
         room: room._id,
-        spotifyId,
+        youtubeId,
         status: SONG_STATUS.QUEUED
       });
 
@@ -55,13 +66,11 @@ exports.addSong = async (req, res, next) => {
 
     // Create song
     const song = await Song.create({
-      spotifyId,
+      youtubeId,
       title,
       artist,
-      album,
-      albumArt,
+      thumbnail,
       durationMs,
-      previewUrl,
       addedBy: req.user._id,
       room: room._id
     });
@@ -75,6 +84,17 @@ exports.addSong = async (req, res, next) => {
       data: populatedSong
     });
   } catch (error) {
+    console.error('Error adding song:', error.message);
+    
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(', ')
+      });
+    }
+    
     next(error);
   }
 };

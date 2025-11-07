@@ -2,9 +2,9 @@ const mongoose = require('mongoose');
 const { SONG_STATUS } = require('../config/constants');
 
 const songSchema = new mongoose.Schema({
-  spotifyId: {
+  youtubeId: {
     type: String,
-    required: [true, 'Spotify ID is required']
+    required: [true, 'YouTube ID is required']
   },
   title: {
     type: String,
@@ -17,11 +17,7 @@ const songSchema = new mongoose.Schema({
     required: [true, 'Artist name is required'],
     trim: true
   },
-  album: {
-    type: String,
-    default: ''
-  },
-  albumArt: {
+  thumbnail: {
     type: String,
     default: null
   },
@@ -29,10 +25,6 @@ const songSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Duration is required'],
     min: [0, 'Duration must be positive']
-  },
-  previewUrl: {
-    type: String,
-    default: null
   },
   addedBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -76,6 +68,6 @@ songSchema.set('toObject', { virtuals: true });
 
 // Index for efficient querying
 songSchema.index({ room: 1, status: 1, createdAt: 1 });
-songSchema.index({ spotifyId: 1, room: 1 });
+songSchema.index({ youtubeId: 1, room: 1 });
 
 module.exports = mongoose.model('Song', songSchema);

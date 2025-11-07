@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import { AnimatedRing } from '@/components/AnimatedRing';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -49,32 +50,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden px-4 py-12">
-      {/* Background effects */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_rgba(139,92,246,0.12),_transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(236,72,153,0.08),_transparent_60%)]" />
-      
-      <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-3xl border border-white/10 bg-surface/80 backdrop-blur-xl p-8 shadow-2xl">
-          {/* Logo/Brand */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-            <p className="text-muted">Join Groovly and start vibing</p>
-          </div>
+    <main className="min-h-screen flex items-center justify-center bg-[#111] relative overflow-hidden px-4 py-12">
+      <div className="relative z-10 ring-container">
+        <AnimatedRing>
+          <h2 className="text-5xl text-white font-quicksand font-light">Sign Up</h2>
+          
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+            {/* Error message */}
+            {(error || validationError) && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+                <p className="text-sm text-red-400 text-center">{error || validationError}</p>
+              </div>
+            )}
 
-          {/* Error message */}
-          {(error || validationError) && (
-            <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 p-4">
-              <p className="text-sm text-red-400">{error || validationError}</p>
-            </div>
-          )}
-
-          {/* Register form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-white mb-2">
-                Name
-              </label>
+            <div className="relative w-full">
               <input
                 type="text"
                 id="name"
@@ -82,15 +71,12 @@ export default function RegisterPage() {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="John Doe"
+                className="relative w-full py-3 px-5 bg-transparent border-2 border-white rounded-full text-xl text-white outline-none placeholder:text-white/75"
+                placeholder="Name"
               />
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                Email
-              </label>
+            <div className="relative w-full">
               <input
                 type="email"
                 id="email"
@@ -98,15 +84,12 @@ export default function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="your@email.com"
+                className="relative w-full py-3 px-5 bg-transparent border-2 border-white rounded-full text-xl text-white outline-none placeholder:text-white/75"
+                placeholder="Email"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-                Password
-              </label>
+            <div className="relative w-full">
               <input
                 type="password"
                 id="password"
@@ -115,15 +98,12 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="••••••••"
+                className="relative w-full py-3 px-5 bg-transparent border-2 border-white rounded-full text-xl text-white outline-none placeholder:text-white/75"
+                placeholder="Password"
               />
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2">
-                Confirm Password
-              </label>
+            <div className="relative w-full">
               <input
                 type="password"
                 id="confirmPassword"
@@ -132,42 +112,34 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="••••••••"
+                className="relative w-full py-3 px-5 bg-transparent border-2 border-white rounded-full text-xl text-white outline-none placeholder:text-white/75"
+                placeholder="Confirm Password"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Creating account...' : 'Sign Up'}
-            </button>
+            <div className="relative w-full">
+              <input
+                type="submit"
+                value={isLoading ? 'Creating account...' : 'Sign Up'}
+                disabled={isLoading}
+                className="w-full py-3 px-5 bg-gradient-to-r from-[#ff357a] to-[#fff172] border-none rounded-full text-xl text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div className="relative w-full flex items-center justify-center px-5">
+              <Link href="/auth/login" className="text-white no-underline text-base hover:underline">
+                Already have an account? Login
+              </Link>
+            </div>
+
+            {/* Back to home */}
+            <div className="text-center">
+              <Link href="/" className="text-sm text-white/60 hover:text-white transition">
+                ← Back to home
+              </Link>
+            </div>
           </form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center">
-            <div className="flex-1 border-t border-white/10"></div>
-            <span className="px-4 text-sm text-muted">or</span>
-            <div className="flex-1 border-t border-white/10"></div>
-          </div>
-
-          {/* Login link */}
-          <p className="text-center text-muted">
-            Already have an account?{' '}
-            <Link href="/auth/login" className="text-purple-400 hover:text-purple-300 font-medium transition">
-              Login
-            </Link>
-          </p>
-
-          {/* Back to home */}
-          <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-muted hover:text-white transition">
-              ← Back to home
-            </Link>
-          </div>
-        </div>
+        </AnimatedRing>
       </div>
     </main>
   );

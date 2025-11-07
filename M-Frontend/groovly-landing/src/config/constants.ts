@@ -26,10 +26,8 @@ export const API_ENDPOINTS = {
   SKIP_SONG: (roomId: string, songId: string) => `/api/rooms/${roomId}/songs/${songId}/skip`,
   REMOVE_SONG: (roomId: string, songId: string) => `/api/rooms/${roomId}/songs/${songId}`,
   
-  // Spotify
-  SPOTIFY_SEARCH: '/api/spotify/search',
-  SPOTIFY_TRACK: (trackId: string) => `/api/spotify/track/${trackId}`,
-  SPOTIFY_RECOMMENDATIONS: (trackId: string) => `/api/spotify/recommendations/${trackId}`,
+  // YouTube Music
+  YOUTUBE_SEARCH: '/api/youtube/search',
 };
 
 export const SOCKET_EVENTS = {

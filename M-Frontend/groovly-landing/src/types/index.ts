@@ -4,7 +4,6 @@ export interface User {
   name: string;
   email: string;
   avatarUrl?: string;
-  spotifyId?: string;
   activeRoom?: string;
   createdAt: string;
   updatedAt: string;
@@ -63,13 +62,11 @@ export enum SongStatus {
 
 export interface Song {
   _id: string;
-  spotifyId: string;
+  youtubeId: string;
   title: string;
   artist: string;
-  album: string;
-  albumArt?: string;
+  thumbnail?: string;
   durationMs: number;
-  previewUrl?: string;
   addedBy: User | string;
   upvotes: string[];
   downvotes: string[];

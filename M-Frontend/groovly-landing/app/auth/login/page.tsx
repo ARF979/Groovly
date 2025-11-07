@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import { AnimatedRing } from '@/components/AnimatedRing';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,32 +33,20 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden px-4">
-      {/* Background effects */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_rgba(139,92,246,0.12),_transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(236,72,153,0.08),_transparent_60%)]" />
-      
-      <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-3xl border border-white/10 bg-surface/80 backdrop-blur-xl p-8 shadow-2xl">
-          {/* Logo/Brand */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-muted">Login to continue to Groovly</p>
-          </div>
+    <main className="min-h-screen flex items-center justify-center bg-[#111] relative overflow-hidden px-4">
+      <div className="relative z-10 ring-container">
+        <AnimatedRing>
+          <h2 className="text-5xl text-white font-quicksand font-light">Login</h2>
+          
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+            {/* Error message */}
+            {error && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+                <p className="text-sm text-red-400 text-center">{error}</p>
+              </div>
+            )}
 
-          {/* Error message */}
-          {error && (
-            <div className="mb-6 rounded-lg bg-red-500/10 border border-red-500/20 p-4">
-              <p className="text-sm text-red-400">{error}</p>
-            </div>
-          )}
-
-          {/* Login form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
-                Email
-              </label>
+            <div className="relative w-full">
               <input
                 type="email"
                 id="email"
@@ -65,15 +54,12 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="your@email.com"
+                className="relative w-full py-3 px-5 bg-transparent border-2 border-white rounded-full text-xl text-white outline-none placeholder:text-white/75"
+                placeholder="Email"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-                Password
-              </label>
+            <div className="relative w-full">
               <input
                 type="password"
                 id="password"
@@ -82,42 +68,37 @@ export default function LoginPage() {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
-                placeholder="••••••••"
+                className="relative w-full py-3 px-5 bg-transparent border-2 border-white rounded-full text-xl text-white outline-none placeholder:text-white/75"
+                placeholder="Password"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
+            <div className="relative w-full">
+              <input
+                type="submit"
+                value={isLoading ? 'Signing in...' : 'Sign in'}
+                disabled={isLoading}
+                className="w-full py-3 px-5 bg-gradient-to-r from-[#ff357a] to-[#fff172] border-none rounded-full text-xl text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div className="relative w-full flex items-center justify-between px-5">
+              <Link href="#" className="text-white no-underline text-base hover:underline">
+                Forget Password
+              </Link>
+              <Link href="/auth/register" className="text-white no-underline text-base hover:underline">
+                Signup
+              </Link>
+            </div>
+
+            {/* Back to home */}
+            <div className="text-center">
+              <Link href="/" className="text-sm text-white/60 hover:text-white transition">
+                ← Back to home
+              </Link>
+            </div>
           </form>
-
-          {/* Divider */}
-          <div className="my-6 flex items-center">
-            <div className="flex-1 border-t border-white/10"></div>
-            <span className="px-4 text-sm text-muted">or</span>
-            <div className="flex-1 border-t border-white/10"></div>
-          </div>
-
-          {/* Register link */}
-          <p className="text-center text-muted">
-            Don't have an account?{' '}
-            <Link href="/auth/register" className="text-purple-400 hover:text-purple-300 font-medium transition">
-              Sign up
-            </Link>
-          </p>
-
-          {/* Back to home */}
-          <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-muted hover:text-white transition">
-              ← Back to home
-            </Link>
-          </div>
-        </div>
+        </AnimatedRing>
       </div>
     </main>
   );

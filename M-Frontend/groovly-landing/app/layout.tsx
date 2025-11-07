@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Inter, Poppins, Lato, Imperial_Script, Quicksand } from "next/font/google";
 import "../styles/globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
@@ -7,6 +7,21 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
   variable: "--font-display",
+});
+const lato = Lato({
+  subsets: ["latin"],
+  weight: ["300", "400", "700"],
+  variable: "--font-lato",
+});
+const imperialScript = Imperial_Script({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-imperial",
+});
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-quicksand",
 });
 
 export const metadata: Metadata = {
@@ -16,7 +31,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
+    <html lang="en" className={`${inter.variable} ${poppins.variable} ${lato.variable} ${imperialScript.variable} ${quicksand.variable}`}>
+      <head>
+        <script src="https://www.youtube.com/iframe_api" async></script>
+      </head>
       <body className="bg-bg text-white font-sans min-h-screen flex items-stretch">
         <div className="flex-1">{children}</div>
       </body>

@@ -16,7 +16,7 @@ const router = express.Router({ mergeParams: true });
 
 // Validation rules
 const addSongValidation = [
-  body('spotifyId').trim().notEmpty().withMessage('Spotify ID is required'),
+  body('youtubeId').trim().notEmpty().withMessage('YouTube ID is required'),
   body('title').trim().notEmpty().withMessage('Song title is required'),
   body('artist').trim().notEmpty().withMessage('Artist name is required'),
   body('durationMs').isInt({ min: 0 }).withMessage('Valid duration is required'),
