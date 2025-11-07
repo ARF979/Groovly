@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap");
 
 :root {
   color-scheme: dark;
@@ -17,8 +17,16 @@ body {
   background-color: #000000;
   font-family: var(--font-body, "Inter", system-ui, sans-serif);
   -webkit-font-smoothing: antialiased;
-  background-image: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08), transparent 50%),
-                    radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.05), transparent 50%);
+  background-image: radial-gradient(
+      ellipse at top,
+      rgba(139, 92, 246, 0.08),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom right,
+      rgba(236, 72, 153, 0.05),
+      transparent 50%
+    );
 }
 
 a {
@@ -51,5 +59,61 @@ a {
 }
 
 .font-handwriting {
-  font-family: 'Permanent Marker', cursive;
+  font-family: "Permanent Marker", cursive;
+}
+
+/* Custom slider styles */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a855f7;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  transition: all 0.2s ease;
+}
+
+input[type="range"].slider::-webkit-slider-thumb:hover {
+  background: #9333ea;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
+  transform: scale(1.1);
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a855f7;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+  transition: all 0.2s ease;
+}
+
+input[type="range"].slider::-moz-range-thumb:hover {
+  background: #9333ea;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.8);
+  transform: scale(1.1);
+}
+
+input[type="range"].slider:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input[type="range"].slider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+input[type="range"].slider:disabled::-moz-range-thumb {
+  cursor: not-allowed;
 }

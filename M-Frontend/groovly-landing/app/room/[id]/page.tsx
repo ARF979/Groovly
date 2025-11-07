@@ -1,28 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useAuthStore } from '@/store/authStore';
-import api, { handleApiError } from '@/lib/api';
-import socketService from '@/lib/socket';
-import { API_ENDPOINTS, SOCKET_EVENTS } from '@/config/constants';
-import { Room, Song, User } from '@/types';
-import { useYouTubePlayer } from '@/hooks/useYouTubePlayer';
+import { useEffect, useState, useCallback } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
+import api, { handleApiError } from "@/lib/api";
+import socketService from "@/lib/socket";
+import { API_ENDPOINTS, SOCKET_EVENTS } from "@/config/constants";
+import { Room, Song, User } from "@/types";
+import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
 
 export default function RoomPage() {
   const router = useRouter();
   const params = useParams();
   const roomId = params.id as string;
-  
+
   const { user, isAuthenticated, loadUser } = useAuthStore();
   const [room, setRoom] = useState<Room | null>(null);
   const [queue, setQueue] = useState<Song[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showAddSong, setShowAddSong] = useState(false);
 
   // Check if current user is host
-  const isHost = room && user && (typeof room.host === 'string' ? room.host === user._id : room.host._id === user._id);
+  const isHost =
+    room &&
+    user &&
+    (typeof room.host === "string"
+      ? room.host === user._id
+      : room.host._id === user._id);
 
   // Fetch room data
   const fetchRoom = useCallback(async () => {
@@ -44,7 +49,7 @@ export default function RoomPage() {
       );
       setQueue(response.data.data);
     } catch (err) {
-      console.error('Error fetching queue:', err);
+      console.error("Error fetching queue:", err);
     }
   }, [roomId]);
 
@@ -62,7 +67,7 @@ export default function RoomPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/auth/login');
+      router.push("/auth/login");
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -78,60 +83,64 @@ export default function RoomPage() {
 
     // Listen for queue updates
     socket.on(SOCKET_EVENTS.QUEUE_UPDATED, (data) => {
-      console.log('Queue updated:', data);
+      console.log("Queue updated:", data);
       fetchQueue();
     });
 
     // Listen for song updates
     socket.on(SOCKET_EVENTS.SONG_UPDATED, (data) => {
-      console.log('Song updated:', data);
-      setQueue(prev => prev.map(song => 
-        song._id === data.song._id ? data.song : song
-      ));
+      console.log("Song updated:", data);
+      setQueue((prev) =>
+        prev.map((song) => (song._id === data.song._id ? data.song : song))
+      );
     });
 
     // Listen for playback state
     socket.on(SOCKET_EVENTS.PLAYBACK_STATE, (data) => {
-      console.log('Playback state:', data);
-      setRoom(prev => prev ? {
-        ...prev,
-        playbackState: {
-          ...prev.playbackState,
-          isPlaying: data.isPlaying,
-          position: data.position,
-          lastUpdated: new Date().toISOString(),
-        }
-      } : null);
+      console.log("Playback state:", data);
+      setRoom((prev) =>
+        prev
+          ? {
+              ...prev,
+              playbackState: {
+                ...prev.playbackState,
+                isPlaying: data.isPlaying,
+                position: data.position,
+                lastUpdated: new Date().toISOString(),
+              },
+            }
+          : null
+      );
     });
 
     // Listen for song started
     socket.on(SOCKET_EVENTS.SONG_STARTED, (data) => {
-      console.log('Song started:', data);
+      console.log("Song started:", data);
       fetchRoom();
       fetchQueue();
     });
 
     // Listen for member updates
     socket.on(SOCKET_EVENTS.MEMBER_JOINED, (data) => {
-      console.log('Member joined:', data);
+      console.log("Member joined:", data);
       fetchRoom();
     });
 
     socket.on(SOCKET_EVENTS.MEMBER_LEFT, (data) => {
-      console.log('Member left:', data);
+      console.log("Member left:", data);
       fetchRoom();
     });
 
     // Listen for errors
     socket.on(SOCKET_EVENTS.ERROR, (data) => {
-      console.error('Socket error:', data);
+      console.error("Socket error:", data);
       setError(data.message);
     });
 
     // Listen for room closed
     socket.on(SOCKET_EVENTS.ROOM_CLOSED, () => {
-      alert('Room has been closed by the host');
-      router.push('/dashboard');
+      alert("Room has been closed by the host");
+      router.push("/dashboard");
     });
 
     // Cleanup
@@ -152,19 +161,19 @@ export default function RoomPage() {
   const handleLeaveRoom = async () => {
     try {
       await api.post(API_ENDPOINTS.LEAVE_ROOM(roomId));
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
-      console.error('Error leaving room:', err);
+      console.error("Error leaving room:", err);
     }
   };
 
   // Handle close room (host only)
   const handleCloseRoom = async () => {
-    if (!confirm('Are you sure you want to close this room?')) return;
-    
+    if (!confirm("Are you sure you want to close this room?")) return;
+
     try {
       await api.delete(API_ENDPOINTS.CLOSE_ROOM(roomId));
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
       setError(handleApiError(err));
     }
@@ -184,7 +193,7 @@ export default function RoomPage() {
         <div className="text-center">
           <div className="text-white text-xl mb-4">Room not found</div>
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push("/dashboard")}
             className="px-6 py-3 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
           >
             Back to Dashboard
@@ -199,7 +208,7 @@ export default function RoomPage() {
       {/* Background effects */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_center,_rgba(139,92,246,0.12),_transparent_50%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(236,72,153,0.08),_transparent_60%)]" />
-      
+
       <div className="relative z-10">
         {/* Header */}
         <header className="border-b border-white/10 bg-black/50 backdrop-blur-sm">
@@ -208,11 +217,20 @@ export default function RoomPage() {
               <div>
                 <h1 className="text-2xl font-bold text-white">{room.name}</h1>
                 <div className="flex items-center gap-4 mt-1">
-                  <span className="text-sm text-muted">Code: <span className="font-mono text-purple-400">{room.code}</span></span>
+                  <span className="text-sm text-muted">
+                    Code:{" "}
+                    <span className="font-mono text-purple-400">
+                      {room.code}
+                    </span>
+                  </span>
                   <span className="text-sm text-muted">•</span>
-                  <span className="text-sm text-muted capitalize">{room.mode.replace('-', ' ')}</span>
+                  <span className="text-sm text-muted capitalize">
+                    {room.mode.replace("-", " ")}
+                  </span>
                   <span className="text-sm text-muted">•</span>
-                  <span className="text-sm text-muted">{room.members.length} members</span>
+                  <span className="text-sm text-muted">
+                    {room.members.length} members
+                  </span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -250,7 +268,13 @@ export default function RoomPage() {
             {/* Queue Section - Main */}
             <div className="lg:col-span-2 space-y-6">
               {/* Now Playing */}
-              <NowPlaying room={room} isHost={!!isHost} queue={queue} user={user} />
+              <NowPlaying
+                room={room}
+                isHost={!!isHost}
+                queue={queue}
+                user={user}
+                fetchQueue={fetchQueue}
+              />
 
               {/* Add Song Button */}
               <div className="flex justify-between items-center">
@@ -264,13 +288,23 @@ export default function RoomPage() {
               </div>
 
               {/* Queue List */}
-              <QueueList queue={queue} roomId={roomId} room={room} currentUserId={user?._id} />
+              <QueueList
+                queue={queue}
+                roomId={roomId}
+                room={room}
+                currentUserId={user?._id}
+              />
             </div>
 
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Room Members */}
-              <MembersList members={room.members} hostId={typeof room.host === 'string' ? room.host : room.host._id} />
+              <MembersList
+                members={room.members}
+                hostId={
+                  typeof room.host === "string" ? room.host : room.host._id
+                }
+              />
             </div>
           </div>
         </div>
@@ -285,45 +319,114 @@ export default function RoomPage() {
 }
 
 // Now Playing Component
-function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean; queue: Song[]; user: User | null }) {
+function NowPlaying({
+  room,
+  isHost,
+  queue,
+  user,
+  fetchQueue,
+}: {
+  room: Room;
+  isHost: boolean;
+  queue: Song[];
+  user: User | null;
+  fetchQueue: () => Promise<void>;
+}) {
   const currentSong = room.currentSong as Song | null;
-  
+
   // Initialize YouTube Player for host
   const youtubePlayer = useYouTubePlayer(isHost, room._id);
-  
+
   // Track playback state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isDraggingSlider, setIsDraggingSlider] = useState(false);
+
+  // Autoplay handler - when a song ends, play the next one
+  useEffect(() => {
+    if (!isHost) return;
+
+    const handleSongEnded = async (event: any) => {
+      if (event.detail.roomId === room._id) {
+        console.log(
+          "🎵 Song ended, fetching updated queue and autoplaying next song..."
+        );
+        // Fetch latest queue to get updated votes before playing next
+        try {
+          await fetchQueue();
+          // Wait for queue state to update, then play next
+          setTimeout(() => {
+            if (queue.length > 0) {
+              console.log("Triggering autoplay for next song");
+              handlePlayNext();
+            } else {
+              console.log("No more songs in queue");
+            }
+          }, 1500);
+        } catch (err) {
+          console.error("Error fetching queue for autoplay:", err);
+          // Fallback: try to play next anyway
+          setTimeout(() => {
+            handlePlayNext();
+          }, 1500);
+        }
+      }
+    };
+
+    window.addEventListener("youtube-song-ended", handleSongEnded);
+
+    return () => {
+      window.removeEventListener("youtube-song-ended", handleSongEnded);
+    };
+  }, [isHost, room._id, queue.length, fetchQueue]);
 
   // Play song with YouTube when it changes
   useEffect(() => {
     if (!isHost || !currentSong || !youtubePlayer.isReady) return;
 
     if (currentSong.youtubeId) {
-      console.log('Playing with YouTube:', currentSong.youtubeId);
+      console.log("Playing with YouTube:", currentSong.youtubeId);
       youtubePlayer.playVideo(currentSong.youtubeId, 0);
     }
   }, [currentSong?.youtubeId, isHost, youtubePlayer.isReady]);
 
-  // Sync YouTube player state
+  // Sync YouTube player state with proper duration handling
   useEffect(() => {
     if (!isHost || !youtubePlayer.isReady) return;
 
     setIsPlaying(youtubePlayer.isPlaying);
-    setCurrentTime(youtubePlayer.currentTime);
-    setDuration(youtubePlayer.duration);
+    if (!isDraggingSlider) {
+      setCurrentTime(youtubePlayer.currentTime);
+    }
 
-    // Broadcast to members
-    if (isHost) {
-      socketService.emit('playback-update', {
+    // Only update duration if it's valid and significantly different
+    if (
+      youtubePlayer.duration > 0 &&
+      Math.abs(duration - youtubePlayer.duration) > 1
+    ) {
+      console.log("Updating duration:", youtubePlayer.duration);
+      setDuration(youtubePlayer.duration);
+    }
+
+    // Broadcast to members only with valid duration
+    if (isHost && youtubePlayer.duration > 0) {
+      socketService.emit("playback-update", {
         roomId: room._id,
         duration: youtubePlayer.duration,
         currentTime: youtubePlayer.currentTime,
-        isPlaying: youtubePlayer.isPlaying
+        isPlaying: youtubePlayer.isPlaying,
       });
     }
-  }, [youtubePlayer.isPlaying, youtubePlayer.currentTime, youtubePlayer.duration, isHost, room._id]);
+  }, [
+    youtubePlayer.isPlaying,
+    youtubePlayer.currentTime,
+    youtubePlayer.duration,
+    isHost,
+    room._id,
+    isDraggingSlider,
+    duration,
+  ]);
 
   // Listen for playback updates from host (ONLY for members)
   useEffect(() => {
@@ -331,53 +434,33 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
 
     const handlePlaybackUpdate = (data: any) => {
       setDuration(data.duration);
-      setCurrentTime(data.currentTime);
+      if (!isDraggingSlider) {
+        setCurrentTime(data.currentTime);
+      }
       setIsPlaying(data.isPlaying);
     };
 
-    socketService.on('playback-update', handlePlaybackUpdate);
+    socketService.on("playback-update", handlePlaybackUpdate);
 
     return () => {
-      socketService.off('playback-update', handlePlaybackUpdate);
+      socketService.off("playback-update", handlePlaybackUpdate);
     };
-  }, [isHost]);
-
-  // Listen for member commands (ONLY for host)
-  useEffect(() => {
-    if (!isHost || !youtubePlayer.isReady) return;
-
-    const handleHostPlayCommand = (data: any) => {
-      console.log(`${data.from} requested play`);
-      youtubePlayer.resume();
-      setIsPlaying(true);
-    };
-
-    const handleHostPauseCommand = (data: any) => {
-      console.log(`${data.from} requested pause`);
-      youtubePlayer.pause();
-      setIsPlaying(false);
-    };
-
-    socketService.on('host-play-command', handleHostPlayCommand);
-    socketService.on('host-pause-command', handleHostPauseCommand);
-
-    return () => {
-      socketService.off('host-play-command', handleHostPlayCommand);
-      socketService.off('host-pause-command', handleHostPauseCommand);
-    };
-  }, [isHost, youtubePlayer]);
+  }, [isHost, isDraggingSlider]);
 
   const handlePlay = () => {
     if (isHost && youtubePlayer.isReady) {
       // Check if we need to load a video or just resume
       if (currentSong?.youtubeId) {
         // If no video is currently loaded or it's a different video, load it
-        if (!youtubePlayer.currentVideoId || youtubePlayer.currentVideoId !== currentSong.youtubeId) {
-          console.log('Loading and playing video:', currentSong.youtubeId);
+        if (
+          !youtubePlayer.currentVideoId ||
+          youtubePlayer.currentVideoId !== currentSong.youtubeId
+        ) {
+          console.log("Loading and playing video:", currentSong.youtubeId);
           youtubePlayer.playVideo(currentSong.youtubeId, 0);
         } else {
           // Same video, just resume
-          console.log('Resuming current video');
+          console.log("Resuming current video");
           youtubePlayer.resume();
         }
       } else {
@@ -385,15 +468,12 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
         youtubePlayer.resume();
       }
       setIsPlaying(true);
-      socketService.emit('playback-update', {
+      socketService.emit("playback-update", {
         roomId: room._id,
         duration: youtubePlayer.duration,
         currentTime: youtubePlayer.currentTime,
-        isPlaying: true
+        isPlaying: true,
       });
-    } else if (!isHost) {
-      // Members send command to host
-      socketService.emit('member-play', { roomId: room._id });
     }
   };
 
@@ -402,32 +482,36 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
       // YouTube playback
       youtubePlayer.pause();
       setIsPlaying(false);
-      socketService.emit('playback-update', {
+      socketService.emit("playback-update", {
         roomId: room._id,
         duration: youtubePlayer.duration,
         currentTime: youtubePlayer.currentTime,
-        isPlaying: false
+        isPlaying: false,
       });
-    } else if (!isHost) {
-      // Members send command to host
-      socketService.emit('member-pause', { roomId: room._id });
     }
   };
 
   const handleSkip = async () => {
-    if (currentSong) {
-      if (isHost && youtubePlayer.isReady) {
+    if (currentSong && isHost) {
+      if (youtubePlayer.isReady) {
         youtubePlayer.pause();
         setIsPlaying(false);
       }
-      
+
       socketService.emit(SOCKET_EVENTS.HOST_SKIP, {
         roomId: room._id,
         songId: currentSong._id,
       });
-      
-      if (isHost && queue.length > 0) {
-        setTimeout(() => handlePlayNext(), 500);
+
+      // Fetch updated queue before playing next
+      if (queue.length > 0) {
+        try {
+          await fetchQueue();
+          setTimeout(() => handlePlayNext(), 1000);
+        } catch (err) {
+          console.error("Error fetching queue after skip:", err);
+          setTimeout(() => handlePlayNext(), 1000);
+        }
       }
     }
   };
@@ -437,22 +521,48 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
       const response = await api.post(API_ENDPOINTS.PLAY_NEXT_SONG(room._id));
       // Room will be updated via socket event
     } catch (error: any) {
-      console.error('Failed to play next song:', error);
-      alert(error.response?.data?.message || 'Failed to start playing');
+      console.error("Failed to play next song:", error);
+      alert(error.response?.data?.message || "Failed to start playing");
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(e.target.value);
+    setCurrentTime(newTime);
+  };
+
+  const handleSliderMouseDown = () => {
+    setIsDraggingSlider(true);
+  };
+
+  const handleSliderMouseUp = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsDraggingSlider(false);
+    const newTime = parseFloat(e.target.value);
+
+    if (isHost && youtubePlayer.isReady) {
+      youtubePlayer.seek(newTime);
+      socketService.emit("playback-update", {
+        roomId: room._id,
+        duration: youtubePlayer.duration,
+        currentTime: newTime,
+        isPlaying: youtubePlayer.isPlaying,
+      });
     }
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   if (!currentSong) {
     return (
       <div className="rounded-2xl border border-white/10 bg-surface/40 backdrop-blur-xl p-8 text-center">
         <div className="text-muted mb-2">No song playing</div>
-        <div className="text-white/60 text-sm mb-4">Add a song to get started!</div>
+        <div className="text-white/60 text-sm mb-4">
+          Add a song to get started!
+        </div>
         {isHost && queue.length > 0 && (
           <button
             onClick={handlePlayNext}
@@ -470,10 +580,13 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
       {/* YouTube Player Container - visible for host */}
       {isHost && (
         <div className="mb-4">
-          <div id={`youtube-player-${room._id}`} className="w-full aspect-video rounded-lg overflow-hidden"></div>
+          <div
+            id={`youtube-player-${room._id}`}
+            className="w-full aspect-video rounded-lg overflow-hidden"
+          ></div>
         </div>
       )}
-      
+
       <div className="flex items-center justify-between mb-3">
         <div className="text-sm text-muted">Now Playing</div>
         <div className="flex items-center gap-2">
@@ -493,7 +606,7 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
           {isHost && youtubePlayer.isReady && (
             <div className="flex items-center gap-2 text-xs text-green-400 bg-green-500/10 px-3 py-1 rounded-full">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              {isPlaying ? 'Playing locally' : 'Ready to play'}
+              {isPlaying ? "Playing locally" : "Ready to play"}
             </div>
           )}
         </div>
@@ -507,17 +620,34 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
           />
         )}
         <div className="flex-1">
-          <h3 className="text-2xl font-bold text-white mb-1">{currentSong.title}</h3>
+          <h3 className="text-2xl font-bold text-white mb-1">
+            {currentSong.title}
+          </h3>
           <p className="text-lg text-muted mb-4">{currentSong.artist}</p>
-          
-          {/* Audio Progress Bar */}
+
+          {/* Audio Progress Bar with Slider */}
           <div className="mb-4">
-            <div className="w-full bg-gray-700 rounded-full h-1.5 mb-2">
-              <div
-                className="bg-purple-500 h-1.5 rounded-full transition-all"
-                style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-              />
-            </div>
+            <input
+              type="range"
+              min="0"
+              max={duration || 0}
+              step="0.1"
+              value={currentTime}
+              onChange={handleSliderChange}
+              onMouseDown={handleSliderMouseDown}
+              onMouseUp={handleSliderMouseUp}
+              onTouchStart={handleSliderMouseDown}
+              onTouchEnd={handleSliderMouseUp}
+              disabled={!isHost}
+              className="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer slider mb-2"
+              style={{
+                background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${
+                  duration ? (currentTime / duration) * 100 : 0
+                }%, #374151 ${
+                  duration ? (currentTime / duration) * 100 : 0
+                }%, #374151 100%)`,
+              }}
+            />
             <div className="flex justify-between text-xs text-muted">
               <span>{formatTime(currentTime)}</span>
               <span>{formatTime(duration)}</span>
@@ -528,32 +658,34 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
           <div className="space-y-2">
             {!isHost && (
               <div className="text-xs text-muted mb-2">
-                🎮 You're controlling the host's player
+                🎵 Only the host can control playback
               </div>
             )}
             <div className="flex gap-3">
-              {isPlaying ? (
-                <button
-                  onClick={handlePause}
-                  className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
-                >
-                  ⏸ Pause
-                </button>
-              ) : (
-                <button
-                  onClick={handlePlay}
-                  className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
-                >
-                  ▶ Play
-                </button>
-              )}
               {isHost && (
-                <button
-                  onClick={handleSkip}
-                  className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
-                >
-                  ⏭ Skip
-                </button>
+                <>
+                  {isPlaying ? (
+                    <button
+                      onClick={handlePause}
+                      className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+                    >
+                      ⏸ Pause
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handlePlay}
+                      className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
+                    >
+                      ▶ Play
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSkip}
+                    className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+                  >
+                    ⏭ Skip
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -564,33 +696,56 @@ function NowPlaying({ room, isHost, queue, user }: { room: Room; isHost: boolean
 }
 
 // Queue List Component
-function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; roomId: string; room: Room; currentUserId?: string }) {
+function QueueList({
+  queue,
+  roomId,
+  room,
+  currentUserId,
+}: {
+  queue: Song[];
+  roomId: string;
+  room: Room;
+  currentUserId?: string;
+}) {
+  // Check if current user is host
+  const isHost =
+    room &&
+    currentUserId &&
+    (typeof room.host === "string"
+      ? room.host === currentUserId
+      : room.host._id === currentUserId);
+
   // Sort queue based on room mode
   const sortedQueue = [...queue].sort((a, b) => {
-    if (room.mode === 'democratic') {
+    if (room.mode === "democratic") {
       return b.voteScore - a.voteScore;
     }
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
   });
 
-  const handleVote = async (songId: string, type: 'upvote' | 'downvote') => {
+  const handleVote = async (songId: string, type: "upvote" | "downvote") => {
     try {
-      const endpoint = type === 'upvote' 
-        ? API_ENDPOINTS.UPVOTE_SONG(roomId, songId)
-        : API_ENDPOINTS.DOWNVOTE_SONG(roomId, songId);
+      const endpoint =
+        type === "upvote"
+          ? API_ENDPOINTS.UPVOTE_SONG(roomId, songId)
+          : API_ENDPOINTS.DOWNVOTE_SONG(roomId, songId);
       await api.post(endpoint);
     } catch (err) {
-      console.error('Error voting:', err);
+      console.error("Error voting:", err);
     }
   };
 
   const handleRemove = async (songId: string) => {
-    if (!confirm('Remove this song from the queue?')) return;
-    
+    if (!confirm("Remove this song from the queue?")) return;
+
     try {
       await api.delete(API_ENDPOINTS.REMOVE_SONG(roomId, songId));
     } catch (err) {
-      console.error('Error removing song:', err);
+      console.error("Error removing song:", err);
+      alert(
+        "Failed to remove song. " + (err as any).response?.data?.message ||
+          "Unknown error"
+      );
     }
   };
 
@@ -598,7 +753,9 @@ function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; room
     return (
       <div className="rounded-2xl border border-white/10 bg-surface/40 backdrop-blur-xl p-12 text-center">
         <div className="text-muted">No songs in queue</div>
-        <div className="text-white/60 text-sm mt-2">Be the first to add a song!</div>
+        <div className="text-white/60 text-sm mt-2">
+          Be the first to add a song!
+        </div>
       </div>
     );
   }
@@ -606,9 +763,16 @@ function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; room
   return (
     <div className="space-y-3">
       {sortedQueue.map((song, index) => {
-        const hasUpvoted = currentUserId && song.upvotes.includes(currentUserId);
-        const hasDownvoted = currentUserId && song.downvotes.includes(currentUserId);
-        const isAddedByUser = currentUserId && (typeof song.addedBy === 'string' ? song.addedBy === currentUserId : song.addedBy._id === currentUserId);
+        const hasUpvoted =
+          currentUserId && song.upvotes.includes(currentUserId);
+        const hasDownvoted =
+          currentUserId && song.downvotes.includes(currentUserId);
+        const isAddedByUser =
+          currentUserId &&
+          (typeof song.addedBy === "string"
+            ? song.addedBy === currentUserId
+            : song.addedBy._id === currentUserId);
+        const canRemove = isHost || isAddedByUser;
 
         return (
           <div
@@ -619,7 +783,7 @@ function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; room
               <div className="text-muted font-mono text-sm w-8">
                 #{index + 1}
               </div>
-              
+
               {song.thumbnail && (
                 <img
                   src={song.thumbnail}
@@ -627,51 +791,84 @@ function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; room
                   className="w-14 h-14 rounded-lg object-cover"
                 />
               )}
-              
+
               <div className="flex-1 min-w-0">
-                <h4 className="text-white font-medium truncate">{song.title}</h4>
+                <h4 className="text-white font-medium truncate">
+                  {song.title}
+                </h4>
                 <p className="text-sm text-muted truncate">{song.artist}</p>
               </div>
 
-              {room.mode === 'democratic' && (
+              {room.mode === "democratic" && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleVote(song._id, 'upvote')}
+                    onClick={() => handleVote(song._id, "upvote")}
                     className={`p-2 rounded-lg transition ${
-                      hasUpvoted 
-                        ? 'bg-green-500/20 text-green-400' 
-                        : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
+                      hasUpvoted
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-white/5 text-muted hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 15l7-7 7 7"
+                      />
                     </svg>
                   </button>
                   <span className="text-white font-medium w-8 text-center">
                     {song.voteScore}
                   </span>
                   <button
-                    onClick={() => handleVote(song._id, 'downvote')}
+                    onClick={() => handleVote(song._id, "downvote")}
                     className={`p-2 rounded-lg transition ${
-                      hasDownvoted 
-                        ? 'bg-red-500/20 text-red-400' 
-                        : 'bg-white/5 text-muted hover:bg-white/10 hover:text-white'
+                      hasDownvoted
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-white/5 text-muted hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </button>
                 </div>
               )}
 
-              {isAddedByUser && (
+              {canRemove && (
                 <button
                   onClick={() => handleRemove(song._id)}
                   className="p-2 rounded-lg bg-white/5 text-red-400 hover:bg-red-500/10 transition"
+                  title={isHost ? "Remove song (Host)" : "Remove your song"}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               )}
@@ -684,15 +881,23 @@ function QueueList({ queue, roomId, room, currentUserId }: { queue: Song[]; room
 }
 
 // Members List Component
-function MembersList({ members, hostId }: { members: Room['members']; hostId: string }) {
+function MembersList({
+  members,
+  hostId,
+}: {
+  members: Room["members"];
+  hostId: string;
+}) {
   return (
     <div className="rounded-2xl border border-white/10 bg-surface/40 backdrop-blur-xl p-6">
-      <h3 className="text-xl font-bold text-white mb-4">Members ({members.length})</h3>
+      <h3 className="text-xl font-bold text-white mb-4">
+        Members ({members.length})
+      </h3>
       <div className="space-y-3">
         {members.map((member) => {
           const user = member.user as User;
           const isHost = user._id === hostId;
-          
+
           return (
             <div key={user._id} className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold">
@@ -700,9 +905,7 @@ function MembersList({ members, hostId }: { members: Room['members']; hostId: st
               </div>
               <div className="flex-1">
                 <div className="text-white font-medium">{user.name}</div>
-                {isHost && (
-                  <div className="text-xs text-purple-400">Host</div>
-                )}
+                {isHost && <div className="text-xs text-purple-400">Host</div>}
               </div>
             </div>
           );
@@ -713,25 +916,30 @@ function MembersList({ members, hostId }: { members: Room['members']; hostId: st
 }
 
 // Add Song Modal Component
-function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void }) {
-  const [searchQuery, setSearchQuery] = useState('');
+function AddSongModal({
+  roomId,
+  onClose,
+}: {
+  roomId: string;
+  onClose: () => void;
+}) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [error, setError] = useState('');
-  const [selectedTrack, setSelectedTrack] = useState<any>(null);
-  const [showOnlyWithPreview, setShowOnlyWithPreview] = useState(false);
+  const [error, setError] = useState("");
+  const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
 
   // Search YouTube
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
-    setError('');
-    
+    setError("");
+
     try {
       const response = await api.get(API_ENDPOINTS.YOUTUBE_SEARCH, {
-        params: { q: searchQuery, limit: 10 }
+        params: { q: searchQuery, limit: 10 },
       });
       setSearchResults(response.data.data || []);
     } catch (err: any) {
@@ -742,17 +950,68 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
     }
   };
 
-  // Add song to queue
+  // Toggle song selection (max 3 songs)
+  const toggleSongSelection = (youtubeId: string) => {
+    const newSelection = new Set(selectedSongs);
+    if (newSelection.has(youtubeId)) {
+      newSelection.delete(youtubeId);
+    } else {
+      // Limit to 3 songs max
+      if (newSelection.size >= 3) {
+        setError("You can only select up to 3 songs at once");
+        setTimeout(() => setError(""), 3000);
+        return;
+      }
+      newSelection.add(youtubeId);
+    }
+    setSelectedSongs(newSelection);
+  };
+
+  // Add selected songs to queue
+  const handleAddSelectedSongs = async () => {
+    if (selectedSongs.size === 0) return;
+
+    setIsAdding(true);
+    setError("");
+
+    try {
+      const songsToAdd = searchResults.filter((track) =>
+        selectedSongs.has(track.youtubeId)
+      );
+
+      // Add songs sequentially to avoid overwhelming the server
+      for (const track of songsToAdd) {
+        const songData = {
+          youtubeId: track.youtubeId,
+          title: track.title,
+          artist: track.artist,
+          thumbnail: track.thumbnail || "",
+          durationMs: track.durationMs,
+        };
+
+        await api.post(API_ENDPOINTS.ADD_SONG(roomId), songData);
+      }
+
+      setSelectedSongs(new Set());
+      onClose();
+    } catch (err) {
+      setError(handleApiError(err));
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  // Add single song to queue
   const handleAddSong = async (track: any) => {
     setIsAdding(true);
-    setError('');
+    setError("");
 
     try {
       const songData = {
         youtubeId: track.youtubeId,
         title: track.title,
         artist: track.artist,
-        thumbnail: track.thumbnail || '',
+        thumbnail: track.thumbnail || "",
         durationMs: track.durationMs,
       };
 
@@ -774,8 +1033,18 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
             onClick={onClose}
             className="text-muted hover:text-white transition"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -793,7 +1062,7 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Search for a song..."
               className="flex-1 px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
@@ -805,13 +1074,25 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
               {isSearching ? (
                 <span className="flex items-center gap-2">
                   <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   Searching...
                 </span>
               ) : (
-                'Search'
+                "Search"
               )}
             </button>
           </div>
@@ -824,36 +1105,98 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
         {searchResults.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Search Results</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-white">
+                  Search Results
+                </h3>
+                <p className="text-xs text-muted mt-1">
+                  {selectedSongs.size === 0
+                    ? "Select up to 3 songs to add at once"
+                    : `${selectedSongs.size}/3 songs selected`}
+                </p>
+              </div>
+              {selectedSongs.size > 0 && (
+                <button
+                  onClick={handleAddSelectedSongs}
+                  disabled={isAdding}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50"
+                >
+                  {isAdding
+                    ? "Adding..."
+                    : `Add ${selectedSongs.size} Song${
+                        selectedSongs.size > 1 ? "s" : ""
+                      }`}
+                </button>
+              )}
             </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {searchResults.map((track) => (
-                <div
-                  key={track.youtubeId}
-                  className="flex items-center gap-4 p-3 rounded-lg bg-black/40 border border-white/10 hover:border-purple-500/50 transition group"
-                >
-                  {track.thumbnail && (
-                    <img
-                      src={track.thumbnail}
-                      alt={track.title}
-                      className="w-14 h-14 rounded-lg object-cover"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-white font-medium truncate">{track.title}</h4>
-                    </div>
-                    <p className="text-sm text-muted truncate">{track.artist}</p>
-                  </div>
-                  <button
-                    onClick={() => handleAddSong(track)}
-                    disabled={isAdding}
-                    className="px-4 py-2 rounded-lg bg-purple-500 text-white text-sm font-medium hover:bg-purple-600 transition opacity-0 group-hover:opacity-100 disabled:opacity-50"
+              {searchResults.map((track) => {
+                const isSelected = selectedSongs.has(track.youtubeId);
+                return (
+                  <div
+                    key={track.youtubeId}
+                    className={`flex items-center gap-4 p-3 rounded-lg border transition group cursor-pointer ${
+                      isSelected
+                        ? "bg-purple-500/20 border-purple-500"
+                        : "bg-black/40 border-white/10 hover:border-purple-500/50"
+                    }`}
+                    onClick={() => toggleSongSelection(track.youtubeId)}
                   >
-                    {isAdding ? 'Adding...' : 'Add'}
-                  </button>
-                </div>
-              ))}
+                    {/* Checkbox */}
+                    <div
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition ${
+                        isSelected
+                          ? "bg-purple-500 border-purple-500"
+                          : "border-white/30"
+                      }`}
+                    >
+                      {isSelected && (
+                        <svg
+                          className="w-3 h-3 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </div>
+
+                    {track.thumbnail && (
+                      <img
+                        src={track.thumbnail}
+                        alt={track.title}
+                        className="w-14 h-14 rounded-lg object-cover"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-white font-medium truncate">
+                          {track.title}
+                        </h4>
+                      </div>
+                      <p className="text-sm text-muted truncate">
+                        {track.artist}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddSong(track);
+                      }}
+                      disabled={isAdding}
+                      className="px-4 py-2 rounded-lg bg-purple-500 text-white text-sm font-medium hover:bg-purple-600 transition opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                    >
+                      {isAdding ? "Adding..." : "Add"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -861,7 +1204,9 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
         {/* Empty State */}
         {!isSearching && searchQuery && searchResults.length === 0 && (
           <div className="text-center py-8">
-            <div className="text-muted">No results found. Try a different search.</div>
+            <div className="text-muted">
+              No results found. Try a different search.
+            </div>
           </div>
         )}
 
@@ -869,9 +1214,13 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
         {!searchQuery && searchResults.length === 0 && (
           <div className="space-y-4">
             <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-4">
-              <h3 className="text-white font-semibold mb-2">💡 Tip: Finding Playable Songs</h3>
+              <h3 className="text-white font-semibold mb-2">
+                💡 Tip: Multi-Select Feature
+              </h3>
               <p className="text-sm text-muted mb-3">
-                Not all songs have 30-second previews. Popular mainstream songs usually work best!
+                Click on songs to select up to 3 at once, then click "Add X
+                Songs" to add them all together! You can have up to 30 songs in
+                your queue.
               </p>
               <div className="text-sm text-white/80">
                 <p className="font-medium mb-1">Try searching for:</p>

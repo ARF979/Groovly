@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
   const [player, setPlayer] = useState<YT.Player | null>(null);
@@ -15,22 +15,22 @@ export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
   // Initialize YouTube IFrame API
   useEffect(() => {
     if (!isHost) {
-      console.log('Skipping YouTube Player initialization: not host');
+      console.log("Skipping YouTube Player initialization: not host");
       return;
     }
 
-    console.log('Initializing YouTube Player...');
+    console.log("Initializing YouTube Player...");
 
     const initializePlayer = () => {
-      if (typeof YT === 'undefined' || !YT.Player) {
-        console.log('Waiting for YouTube IFrame API...');
+      if (typeof YT === "undefined" || !YT.Player) {
+        console.log("Waiting for YouTube IFrame API...");
         setTimeout(initializePlayer, 100);
         return;
       }
 
       const ytPlayer = new YT.Player(`youtube-player-${roomId}`, {
-        height: '360',
-        width: '640',
+        height: "360",
+        width: "640",
         playerVars: {
           autoplay: 1, // Changed to 1 to enable autoplay
           controls: 1, // Show controls so user can interact
@@ -41,40 +41,55 @@ export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
         },
         events: {
           onReady: (event) => {
-            console.log('✅ YouTube Player Ready!');
+            console.log("✅ YouTube Player Ready!");
             playerRef.current = event.target;
             setPlayer(event.target);
             setIsReady(true);
           },
           onStateChange: (event) => {
-            const states = ['UNSTARTED', 'ENDED', 'PLAYING', 'PAUSED', 'BUFFERING', 'CUED'];
-            console.log('YouTube Player State Changed:', event.data, `(${states[event.data + 1] || 'UNKNOWN'})`);
-            
+            const states = [
+              "UNSTARTED",
+              "ENDED",
+              "PLAYING",
+              "PAUSED",
+              "BUFFERING",
+              "CUED",
+            ];
+            console.log(
+              "YouTube Player State Changed:",
+              event.data,
+              `(${states[event.data + 1] || "UNKNOWN"})`
+            );
+
             if (event.data === YT.PlayerState.PLAYING) {
-              console.log('▶️ Video is PLAYING');
+              console.log("▶️ Video is PLAYING");
               setIsPlaying(true);
               // Get duration from the player object, not the event target
               const videoDuration = playerRef.current?.getDuration() || 0;
-              console.log('Duration:', videoDuration);
+              console.log("Duration:", videoDuration);
               setDuration(videoDuration);
               startProgressTracking();
             } else if (event.data === YT.PlayerState.PAUSED) {
-              console.log('⏸️ Video is PAUSED');
+              console.log("⏸️ Video is PAUSED");
               setIsPlaying(false);
               stopProgressTracking();
             } else if (event.data === YT.PlayerState.ENDED) {
-              console.log('⏹️ Video ENDED');
+              console.log("⏹️ Video ENDED - Triggering autoplay");
               setIsPlaying(false);
               stopProgressTracking();
-              console.log('Song ended');
+              // Trigger autoplay event
+              const autoplayEvent = new CustomEvent("youtube-song-ended", {
+                detail: { roomId },
+              });
+              window.dispatchEvent(autoplayEvent);
             } else if (event.data === YT.PlayerState.BUFFERING) {
-              console.log('⏳ Video is BUFFERING');
+              console.log("⏳ Video is BUFFERING");
             } else if (event.data === YT.PlayerState.CUED) {
-              console.log('📝 Video is CUED (ready to play)');
+              console.log("📝 Video is CUED (ready to play)");
             }
           },
           onError: (event) => {
-            console.error('YouTube Player Error:', event.data);
+            console.error("YouTube Player Error:", event.data);
           },
         },
       });
@@ -98,19 +113,19 @@ export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
   // Progress tracking
   const startProgressTracking = useCallback(() => {
     stopProgressTracking();
-    console.log('▶️ Starting progress tracking');
+    console.log("▶️ Starting progress tracking");
     progressInterval.current = setInterval(() => {
       if (playerRef.current) {
         try {
           const time = playerRef.current.getCurrentTime();
           const dur = playerRef.current.getDuration();
-          console.log('⏱️ Progress:', time.toFixed(1), '/', dur.toFixed(1));
+          console.log("⏱️ Progress:", time.toFixed(1), "/", dur.toFixed(1));
           setCurrentTime(time);
           if (dur && dur !== duration) {
             setDuration(dur);
           }
         } catch (e) {
-          console.error('Error getting playback time:', e);
+          console.error("Error getting playback time:", e);
         }
       }
     }, 1000);
@@ -124,74 +139,85 @@ export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
   }, []);
 
   // Play a video
-  const playVideo = useCallback(async (videoId: string, startSeconds: number = 0) => {
-    if (!player || !isReady) {
-      console.error('❌ Player not ready');
-      return;
-    }
-
-    try {
-      console.log('🎵 Loading video:', videoId, 'starting at', startSeconds, 'seconds');
-      setCurrentVideoId(videoId);
-      
-      // Load the video (this will cue it)
-      if (startSeconds > 0) {
-        player.loadVideoById(videoId, startSeconds);
-      } else {
-        player.loadVideoById(videoId);
+  const playVideo = useCallback(
+    async (videoId: string, startSeconds: number = 0) => {
+      if (!player || !isReady) {
+        console.error("❌ Player not ready");
+        return;
       }
-      
-      console.log('✅ Video load command sent');
-      
-      // The video should auto-play due to autoplay:1 setting
-      // But let's force it after a brief delay to be sure
-      setTimeout(() => {
-        if (player && player.playVideo) {
-          console.log('🎬 Forcing playVideo()...');
-          player.playVideo();
+
+      try {
+        console.log(
+          "🎵 Loading video:",
+          videoId,
+          "starting at",
+          startSeconds,
+          "seconds"
+        );
+        setCurrentVideoId(videoId);
+
+        // Load the video (this will cue it)
+        if (startSeconds > 0) {
+          player.loadVideoById(videoId, startSeconds);
+        } else {
+          player.loadVideoById(videoId);
         }
-      }, 300);
-      
-    } catch (error) {
-      console.error('❌ Error playing video:', error);
-    }
-  }, [player, isReady]);
+
+        console.log("✅ Video load command sent");
+
+        // The video should auto-play due to autoplay:1 setting
+        // But let's force it after a brief delay to be sure
+        setTimeout(() => {
+          if (player && player.playVideo) {
+            console.log("🎬 Forcing playVideo()...");
+            player.playVideo();
+          }
+        }, 300);
+      } catch (error) {
+        console.error("❌ Error playing video:", error);
+      }
+    },
+    [player, isReady]
+  );
 
   // Pause
   const pause = useCallback(async () => {
     if (!player) return;
-    
+
     try {
       player.pauseVideo();
-      console.log('✅ Paused');
+      console.log("✅ Paused");
     } catch (error) {
-      console.error('Error pausing:', error);
+      console.error("Error pausing:", error);
     }
   }, [player]);
 
   // Resume
   const resume = useCallback(async () => {
     if (!player) return;
-    
+
     try {
       player.playVideo();
-      console.log('✅ Resumed');
+      console.log("✅ Resumed");
     } catch (error) {
-      console.error('Error resuming:', error);
+      console.error("Error resuming:", error);
     }
   }, [player]);
 
   // Seek
-  const seek = useCallback(async (seconds: number) => {
-    if (!player) return;
-    
-    try {
-      player.seekTo(seconds, true);
-      console.log('✅ Seeked to', seconds);
-    } catch (error) {
-      console.error('Error seeking:', error);
-    }
-  }, [player]);
+  const seek = useCallback(
+    async (seconds: number) => {
+      if (!player) return;
+
+      try {
+        player.seekTo(seconds, true);
+        console.log("✅ Seeked to", seconds);
+      } catch (error) {
+        console.error("Error seeking:", error);
+      }
+    },
+    [player]
+  );
 
   return {
     player,

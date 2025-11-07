@@ -1,10 +1,10 @@
-const Room = require('../models/Room');
-const Song = require('../models/Song');
-const User = require('../models/User');
-const { SOCKET_EVENTS, SONG_STATUS } = require('../config/constants');
+const Room = require("../models/Room");
+const Song = require("../models/Song");
+const User = require("../models/User");
+const { SOCKET_EVENTS, SONG_STATUS } = require("../config/constants");
 
 const setupSocketHandlers = (io) => {
-  io.on('connection', (socket) => {
+  io.on("connection", (socket) => {
     console.log(`User connected: ${socket.user.name} (${socket.id})`);
 
     // Join room
@@ -12,21 +12,23 @@ const setupSocketHandlers = (io) => {
       try {
         const { roomId } = data;
         const room = await Room.findById(roomId)
-          .populate('members.user', 'name avatarUrl')
-          .populate('currentSong');
+          .populate("members.user", "name avatarUrl")
+          .populate("currentSong");
 
         if (!room) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Room not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
           return;
         }
 
         // Check if user is a member
         const isMember = room.members.some(
-          m => m.user._id.toString() === socket.user._id.toString()
+          (m) => m.user._id.toString() === socket.user._id.toString()
         );
 
         if (!isMember) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Not a member of this room' });
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            message: "Not a member of this room",
+          });
           return;
         }
 
@@ -39,14 +41,14 @@ const setupSocketHandlers = (io) => {
           user: {
             _id: socket.user._id,
             name: socket.user.name,
-            avatarUrl: socket.user.avatarUrl
-          }
+            avatarUrl: socket.user.avatarUrl,
+          },
         });
 
         console.log(`${socket.user.name} joined room ${room.code}`);
       } catch (error) {
-        console.error('Error joining room:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to join room' });
+        console.error("Error joining room:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to join room" });
       }
     });
 
@@ -60,14 +62,14 @@ const setupSocketHandlers = (io) => {
           socket.to(roomId).emit(SOCKET_EVENTS.MEMBER_LEFT, {
             user: {
               _id: socket.user._id,
-              name: socket.user.name
-            }
+              name: socket.user.name,
+            },
           });
           socket.currentRoom = null;
           console.log(`${socket.user.name} left room`);
         }
       } catch (error) {
-        console.error('Error leaving room:', error);
+        console.error("Error leaving room:", error);
       }
     });
 
@@ -78,27 +80,29 @@ const setupSocketHandlers = (io) => {
         const room = await Room.findById(roomId);
 
         if (!room) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Room not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
           return;
         }
 
         const song = await Song.create({
           ...songData,
           addedBy: socket.user._id,
-          room: roomId
+          room: roomId,
         });
 
-        const populatedSong = await Song.findById(song._id)
-          .populate('addedBy', 'name avatarUrl');
+        const populatedSong = await Song.findById(song._id).populate(
+          "addedBy",
+          "name avatarUrl"
+        );
 
         // Broadcast to all in room
         io.to(roomId).emit(SOCKET_EVENTS.QUEUE_UPDATED, {
-          action: 'added',
-          song: populatedSong
+          action: "added",
+          song: populatedSong,
         });
       } catch (error) {
-        console.error('Error adding song:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to add song' });
+        console.error("Error adding song:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to add song" });
       }
     });
 
@@ -109,34 +113,44 @@ const setupSocketHandlers = (io) => {
         const song = await Song.findById(songId);
 
         if (!song) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Song not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Song not found" });
           return;
         }
 
         const userId = socket.user._id;
-        const hasUpvoted = song.upvotes.some(id => id.toString() === userId.toString());
-        const hasDownvoted = song.downvotes.some(id => id.toString() === userId.toString());
+        const hasUpvoted = song.upvotes.some(
+          (id) => id.toString() === userId.toString()
+        );
+        const hasDownvoted = song.downvotes.some(
+          (id) => id.toString() === userId.toString()
+        );
 
         if (hasUpvoted) {
-          song.upvotes = song.upvotes.filter(id => id.toString() !== userId.toString());
+          song.upvotes = song.upvotes.filter(
+            (id) => id.toString() !== userId.toString()
+          );
         } else {
           if (hasDownvoted) {
-            song.downvotes = song.downvotes.filter(id => id.toString() !== userId.toString());
+            song.downvotes = song.downvotes.filter(
+              (id) => id.toString() !== userId.toString()
+            );
           }
           song.upvotes.push(userId);
         }
 
         await song.save();
 
-        const populatedSong = await Song.findById(song._id)
-          .populate('addedBy', 'name avatarUrl');
+        const populatedSong = await Song.findById(song._id).populate(
+          "addedBy",
+          "name avatarUrl"
+        );
 
         io.to(roomId).emit(SOCKET_EVENTS.SONG_UPDATED, {
-          song: populatedSong
+          song: populatedSong,
         });
       } catch (error) {
-        console.error('Error upvoting:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to upvote' });
+        console.error("Error upvoting:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to upvote" });
       }
     });
 
@@ -147,34 +161,44 @@ const setupSocketHandlers = (io) => {
         const song = await Song.findById(songId);
 
         if (!song) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Song not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Song not found" });
           return;
         }
 
         const userId = socket.user._id;
-        const hasUpvoted = song.upvotes.some(id => id.toString() === userId.toString());
-        const hasDownvoted = song.downvotes.some(id => id.toString() === userId.toString());
+        const hasUpvoted = song.upvotes.some(
+          (id) => id.toString() === userId.toString()
+        );
+        const hasDownvoted = song.downvotes.some(
+          (id) => id.toString() === userId.toString()
+        );
 
         if (hasDownvoted) {
-          song.downvotes = song.downvotes.filter(id => id.toString() !== userId.toString());
+          song.downvotes = song.downvotes.filter(
+            (id) => id.toString() !== userId.toString()
+          );
         } else {
           if (hasUpvoted) {
-            song.upvotes = song.upvotes.filter(id => id.toString() !== userId.toString());
+            song.upvotes = song.upvotes.filter(
+              (id) => id.toString() !== userId.toString()
+            );
           }
           song.downvotes.push(userId);
         }
 
         await song.save();
 
-        const populatedSong = await Song.findById(song._id)
-          .populate('addedBy', 'name avatarUrl');
+        const populatedSong = await Song.findById(song._id).populate(
+          "addedBy",
+          "name avatarUrl"
+        );
 
         io.to(roomId).emit(SOCKET_EVENTS.SONG_UPDATED, {
-          song: populatedSong
+          song: populatedSong,
         });
       } catch (error) {
-        console.error('Error downvoting:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to downvote' });
+        console.error("Error downvoting:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to downvote" });
       }
     });
 
@@ -185,12 +209,14 @@ const setupSocketHandlers = (io) => {
         const room = await Room.findById(roomId);
 
         if (!room) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Room not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
           return;
         }
 
         if (!room.isHost(socket.user._id)) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Only host can control playback' });
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            message: "Only host can control playback",
+          });
           return;
         }
 
@@ -204,7 +230,7 @@ const setupSocketHandlers = (io) => {
         if (songId) {
           await Song.findByIdAndUpdate(songId, {
             status: SONG_STATUS.PLAYING,
-            playedAt: new Date()
+            playedAt: new Date(),
           });
         }
 
@@ -212,13 +238,13 @@ const setupSocketHandlers = (io) => {
           isPlaying: true,
           songId,
           position: position || 0,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         io.to(roomId).emit(SOCKET_EVENTS.SONG_STARTED, { songId });
       } catch (error) {
-        console.error('Error playing song:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to play song' });
+        console.error("Error playing song:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to play song" });
       }
     });
 
@@ -229,12 +255,14 @@ const setupSocketHandlers = (io) => {
         const room = await Room.findById(roomId);
 
         if (!room) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Room not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
           return;
         }
 
         if (!room.isHost(socket.user._id)) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Only host can control playback' });
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            message: "Only host can control playback",
+          });
           return;
         }
 
@@ -246,11 +274,11 @@ const setupSocketHandlers = (io) => {
         io.to(roomId).emit(SOCKET_EVENTS.PLAYBACK_STATE, {
           isPlaying: false,
           position: position || 0,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       } catch (error) {
-        console.error('Error pausing song:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to pause song' });
+        console.error("Error pausing song:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to pause song" });
       }
     });
 
@@ -261,19 +289,21 @@ const setupSocketHandlers = (io) => {
         const room = await Room.findById(roomId);
 
         if (!room) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Room not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
           return;
         }
 
         if (!room.isHost(socket.user._id)) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Only host can skip songs' });
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            message: "Only host can skip songs",
+          });
           return;
         }
 
         // Mark song as skipped
         await Song.findByIdAndUpdate(songId, {
           status: SONG_STATUS.SKIPPED,
-          playedAt: new Date()
+          playedAt: new Date(),
         });
 
         room.currentSong = null;
@@ -281,10 +311,13 @@ const setupSocketHandlers = (io) => {
         await room.save();
 
         io.to(roomId).emit(SOCKET_EVENTS.SONG_SKIPPED, { songId });
-        io.to(roomId).emit(SOCKET_EVENTS.QUEUE_UPDATED, { action: 'skipped', songId });
+        io.to(roomId).emit(SOCKET_EVENTS.QUEUE_UPDATED, {
+          action: "skipped",
+          songId,
+        });
       } catch (error) {
-        console.error('Error skipping song:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to skip song' });
+        console.error("Error skipping song:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to skip song" });
       }
     });
 
@@ -295,12 +328,12 @@ const setupSocketHandlers = (io) => {
         const room = await Room.findById(roomId);
 
         if (!room) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Room not found' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
           return;
         }
 
         if (!room.isHost(socket.user._id)) {
-          socket.emit(SOCKET_EVENTS.ERROR, { message: 'Only host can seek' });
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Only host can seek" });
           return;
         }
 
@@ -311,66 +344,94 @@ const setupSocketHandlers = (io) => {
         socket.to(roomId).emit(SOCKET_EVENTS.PLAYBACK_STATE, {
           isPlaying: room.playbackState.isPlaying,
           position,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       } catch (error) {
-        console.error('Error seeking:', error);
-        socket.emit(SOCKET_EVENTS.ERROR, { message: 'Failed to seek' });
+        console.error("Error seeking:", error);
+        socket.emit(SOCKET_EVENTS.ERROR, { message: "Failed to seek" });
       }
     });
 
     // Member play command (relayed to host)
-    socket.on('member-play', async (data) => {
+    socket.on("member-play", async (data) => {
       try {
         const { roomId } = data;
+        const room = await Room.findById(roomId);
+
+        if (!room) {
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
+          return;
+        }
+
+        if (!room.isHost(socket.user._id)) {
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            message: "Only host can control playback",
+          });
+          return;
+        }
+
         // Relay to host - host's client will handle the actual playback
-        socket.to(roomId).emit('host-play-command', {
-          from: socket.user.name
+        socket.to(roomId).emit("host-play-command", {
+          from: socket.user.name,
         });
       } catch (error) {
-        console.error('Error relaying play command:', error);
+        console.error("Error relaying play command:", error);
       }
     });
 
     // Member pause command (relayed to host)
-    socket.on('member-pause', async (data) => {
+    socket.on("member-pause", async (data) => {
       try {
         const { roomId } = data;
+        const room = await Room.findById(roomId);
+
+        if (!room) {
+          socket.emit(SOCKET_EVENTS.ERROR, { message: "Room not found" });
+          return;
+        }
+
+        if (!room.isHost(socket.user._id)) {
+          socket.emit(SOCKET_EVENTS.ERROR, {
+            message: "Only host can control playback",
+          });
+          return;
+        }
+
         // Relay to host - host's client will handle the actual playback
-        socket.to(roomId).emit('host-pause-command', {
-          from: socket.user.name
+        socket.to(roomId).emit("host-pause-command", {
+          from: socket.user.name,
         });
       } catch (error) {
-        console.error('Error relaying pause command:', error);
+        console.error("Error relaying pause command:", error);
       }
     });
 
     // Playback update broadcast (from host to members)
-    socket.on('playback-update', async (data) => {
+    socket.on("playback-update", async (data) => {
       try {
         const { roomId, duration, currentTime, isPlaying } = data;
         // Broadcast to all other clients in the room
-        socket.to(roomId).emit('playback-update', {
+        socket.to(roomId).emit("playback-update", {
           duration,
           currentTime,
-          isPlaying
+          isPlaying,
         });
       } catch (error) {
-        console.error('Error broadcasting playback update:', error);
+        console.error("Error broadcasting playback update:", error);
       }
     });
 
     // Disconnect
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.user.name} (${socket.id})`);
-      
+
       if (socket.currentRoom) {
         socket.to(socket.currentRoom).emit(SOCKET_EVENTS.MEMBER_LEFT, {
           user: {
             _id: socket.user._id,
-            name: socket.user.name
+            name: socket.user.name,
           },
-          temporary: true // They might reconnect
+          temporary: true, // They might reconnect
         });
       }
     });

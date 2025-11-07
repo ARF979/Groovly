@@ -49,7 +49,7 @@ module.exports = {
   DEFAULT_ROOM_SETTINGS: {
     skipThreshold: parseInt(process.env.SKIP_THRESHOLD_PERCENTAGE) || 50,
     maxQueueSize: 100,
-    maxSongsPerUser: 5,
+    maxSongsPerUser: 10,
     allowDuplicates: false,
     allowExplicit: true
   },
