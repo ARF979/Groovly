@@ -103,6 +103,13 @@ export default function RoomPage() {
       } : null);
     });
 
+    // Listen for song started
+    socket.on(SOCKET_EVENTS.SONG_STARTED, (data) => {
+      console.log('Song started:', data);
+      fetchRoom();
+      fetchQueue();
+    });
+
     // Listen for member updates
     socket.on(SOCKET_EVENTS.MEMBER_JOINED, (data) => {
       console.log('Member joined:', data);
@@ -131,6 +138,7 @@ export default function RoomPage() {
       socket.emit(SOCKET_EVENTS.LEAVE_ROOM, { roomId });
       socket.off(SOCKET_EVENTS.QUEUE_UPDATED);
       socket.off(SOCKET_EVENTS.SONG_UPDATED);
+      socket.off(SOCKET_EVENTS.SONG_STARTED);
       socket.off(SOCKET_EVENTS.PLAYBACK_STATE);
       socket.off(SOCKET_EVENTS.MEMBER_JOINED);
       socket.off(SOCKET_EVENTS.MEMBER_LEFT);
@@ -241,7 +249,7 @@ export default function RoomPage() {
             {/* Queue Section - Main */}
             <div className="lg:col-span-2 space-y-6">
               {/* Now Playing */}
-              <NowPlaying room={room} isHost={isHost} />
+              <NowPlaying room={room} isHost={!!isHost} queue={queue} />
 
               {/* Add Song Button */}
               <div className="flex justify-between items-center">
@@ -276,39 +284,107 @@ export default function RoomPage() {
 }
 
 // Now Playing Component
-function NowPlaying({ room, isHost }: { room: Room; isHost: boolean }) {
+function NowPlaying({ room, isHost, queue }: { room: Room; isHost: boolean; queue: Song[] }) {
   const currentSong = room.currentSong as Song | null;
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  // Initialize audio element when currentSong changes
+  useEffect(() => {
+    if (currentSong?.previewUrl) {
+      const audioElement = new Audio(currentSong.previewUrl);
+      
+      audioElement.addEventListener('loadedmetadata', () => {
+        setDuration(audioElement.duration);
+      });
+      
+      audioElement.addEventListener('timeupdate', () => {
+        setCurrentTime(audioElement.currentTime);
+      });
+      
+      audioElement.addEventListener('ended', () => {
+        setIsPlaying(false);
+        // Auto-play next song if host and queue has songs
+        if (isHost && queue.length > 0) {
+          handlePlayNext();
+        }
+      });
+      
+      setAudio(audioElement);
+      
+      return () => {
+        audioElement.pause();
+        audioElement.src = '';
+      };
+    } else {
+      setAudio(null);
+      setIsPlaying(false);
+    }
+  }, [currentSong?.previewUrl]);
 
   const handlePlay = () => {
-    if (currentSong) {
-      socketService.emit(SOCKET_EVENTS.HOST_PLAY, {
-        roomId: room._id,
-        songId: currentSong._id,
-      });
+    if (audio) {
+      audio.play();
+      setIsPlaying(true);
     }
   };
 
   const handlePause = () => {
-    socketService.emit(SOCKET_EVENTS.HOST_PAUSE, {
-      roomId: room._id,
-      position: room.playbackState.position,
-    });
+    if (audio) {
+      audio.pause();
+      setIsPlaying(false);
+    }
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     if (currentSong) {
+      if (audio) {
+        audio.pause();
+        setIsPlaying(false);
+      }
       socketService.emit(SOCKET_EVENTS.HOST_SKIP, {
         roomId: room._id,
         songId: currentSong._id,
       });
+      
+      // Auto-play next song if queue is not empty
+      if (queue.length > 0) {
+        setTimeout(() => handlePlayNext(), 500);
+      }
     }
+  };
+
+  const handlePlayNext = async () => {
+    try {
+      const response = await api.post(API_ENDPOINTS.PLAY_NEXT_SONG(room._id));
+      // Room will be updated via socket event
+    } catch (error: any) {
+      console.error('Failed to play next song:', error);
+      alert(error.response?.data?.message || 'Failed to start playing');
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (!currentSong) {
     return (
       <div className="rounded-2xl border border-white/10 bg-surface/40 backdrop-blur-xl p-8 text-center">
         <div className="text-muted mb-2">No song playing</div>
-        <div className="text-white/60 text-sm">Add a song to get started!</div>
+        <div className="text-white/60 text-sm mb-4">Add a song to get started!</div>
+        {isHost && queue.length > 0 && (
+          <button
+            onClick={handlePlayNext}
+            className="px-6 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
+          >
+            ▶ Start Playing
+          </button>
+        )}
       </div>
     );
   }
@@ -328,31 +404,52 @@ function NowPlaying({ room, isHost }: { room: Room; isHost: boolean }) {
           <h3 className="text-2xl font-bold text-white mb-1">{currentSong.title}</h3>
           <p className="text-lg text-muted mb-4">{currentSong.artist}</p>
           
-          {isHost && (
-            <div className="flex gap-3">
-              {room.playbackState.isPlaying ? (
-                <button
-                  onClick={handlePause}
-                  className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
-                >
-                  Pause
-                </button>
-              ) : (
-                <button
-                  onClick={handlePlay}
-                  className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
-                >
-                  Play
-                </button>
-              )}
+          {/* Audio Progress Bar */}
+          {currentSong.previewUrl ? (
+            <div className="mb-4">
+              <div className="w-full bg-gray-700 rounded-full h-1.5 mb-2">
+                <div
+                  className="bg-purple-500 h-1.5 rounded-full transition-all"
+                  style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-yellow-400 mb-4">⚠️ No preview available</p>
+          )}
+
+          {/* Playback Controls */}
+          <div className="flex gap-3">
+            {isPlaying ? (
+              <button
+                onClick={handlePause}
+                disabled={!currentSong.previewUrl}
+                className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ⏸ Pause
+              </button>
+            ) : (
+              <button
+                onClick={handlePlay}
+                disabled={!currentSong.previewUrl}
+                className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ▶ Play
+              </button>
+            )}
+            {isHost && (
               <button
                 onClick={handleSkip}
                 className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
               >
-                Skip
+                ⏭ Skip
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -510,129 +607,159 @@ function MembersList({ members, hostId }: { members: Room['members']; hostId: st
 
 // Add Song Modal Component
 function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void }) {
-  const [songData, setSongData] = useState({
-    spotifyId: '',
-    title: '',
-    artist: '',
-    album: '',
-    durationMs: 180000,
-    albumArt: '',
-    previewUrl: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState('');
+  const [selectedTrack, setSelectedTrack] = useState<any>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  // Search Spotify
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    setError('');
+    
+    try {
+      const response = await api.get(API_ENDPOINTS.SPOTIFY_SEARCH, {
+        params: { q: searchQuery, limit: 10 }
+      });
+      setSearchResults(response.data.data || []);
+    } catch (err: any) {
+      // If Spotify not configured, show message
+      if (err.response?.status === 503) {
+        setError('Spotify not configured. Please add songs manually below.');
+      } else {
+        setError(handleApiError(err));
+      }
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Add song to queue
+  const handleAddSong = async (track: any) => {
+    setIsAdding(true);
     setError('');
 
     try {
-      // Auto-generate spotifyId if empty
-      const dataToSubmit = {
-        ...songData,
-        spotifyId: songData.spotifyId || `manual-${Date.now()}`,
-        album: songData.album || 'Unknown Album', // Ensure album is not empty
+      const songData = {
+        spotifyId: track.spotifyId,
+        title: track.title,
+        artist: track.artist,
+        album: track.album || '',
+        albumArt: track.albumArt || '',
+        durationMs: track.durationMs,
+        previewUrl: track.previewUrl || '',
       };
-      
-      await api.post(API_ENDPOINTS.ADD_SONG(roomId), dataToSubmit);
+
+      await api.post(API_ENDPOINTS.ADD_SONG(roomId), songData);
       onClose();
     } catch (err) {
       setError(handleApiError(err));
     } finally {
-      setIsLoading(false);
+      setIsAdding(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-surface/95 backdrop-blur-xl p-8 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold text-white mb-6">Add Song to Queue</h2>
-        
+      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-surface/95 backdrop-blur-xl p-8 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">Add Song to Queue</h2>
+          <button
+            onClick={onClose}
+            className="text-muted hover:text-white transition"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         {error && (
           <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 p-3">
             <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
-        <div className="mb-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-          <p className="text-sm text-yellow-400">
-            Note: Spotify integration coming soon. For now, manually enter song details.
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="Search for a song..."
+              className="flex-1 px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
+              className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSearching ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Searching...
+                </span>
+              ) : (
+                'Search'
+              )}
+            </button>
+          </div>
+          <p className="text-xs text-muted mt-2">
+            🎵 Search by song title, artist, or album
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Song Title *
-            </label>
-            <input
-              type="text"
-              value={songData.title}
-              onChange={(e) => setSongData(prev => ({ ...prev, title: e.target.value }))}
-              required
-              className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Mr. Brightside"
-            />
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-white">Search Results</h3>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {searchResults.map((track) => (
+                <div
+                  key={track.spotifyId}
+                  className="flex items-center gap-4 p-3 rounded-lg bg-black/40 border border-white/10 hover:border-purple-500/50 transition group"
+                >
+                  {track.albumArt && (
+                    <img
+                      src={track.albumArt}
+                      alt={track.title}
+                      className="w-14 h-14 rounded-lg object-cover"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-white font-medium truncate">{track.title}</h4>
+                    <p className="text-sm text-muted truncate">{track.artist}</p>
+                    <p className="text-xs text-muted truncate">{track.album}</p>
+                  </div>
+                  <button
+                    onClick={() => handleAddSong(track)}
+                    disabled={isAdding}
+                    className="px-4 py-2 rounded-lg bg-purple-500 text-white text-sm font-medium hover:bg-purple-600 transition opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                  >
+                    {isAdding ? 'Adding...' : 'Add'}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Artist *
-            </label>
-            <input
-              type="text"
-              value={songData.artist}
-              onChange={(e) => setSongData(prev => ({ ...prev, artist: e.target.value }))}
-              required
-              className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="The Killers"
-            />
+        {/* Empty State */}
+        {!isSearching && searchQuery && searchResults.length === 0 && (
+          <div className="text-center py-8">
+            <div className="text-muted">No results found. Try a different search.</div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Album (optional)
-            </label>
-            <input
-              type="text"
-              value={songData.album}
-              onChange={(e) => setSongData(prev => ({ ...prev, album: e.target.value }))}
-              className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Hot Fuss"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Spotify ID (optional - auto-generated if empty)
-            </label>
-            <input
-              type="text"
-              value={songData.spotifyId}
-              onChange={(e) => setSongData(prev => ({ ...prev, spotifyId: e.target.value }))}
-              className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
-              placeholder="Leave blank for auto-generated ID"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 rounded-lg border border-white/20 text-white hover:bg-white/10 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50"
-            >
-              {isLoading ? 'Adding...' : 'Add to Queue'}
-            </button>
-          </div>
-        </form>
+        )}
       </div>
     </div>
   );

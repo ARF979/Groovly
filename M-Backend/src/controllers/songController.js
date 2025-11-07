@@ -281,3 +281,70 @@ exports.removeSong = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Play next song in queue
+// @route   POST /api/rooms/:roomId/songs/play-next
+// @access  Private (Host only)
+exports.playNextSong = async (req, res, next) => {
+  try {
+    const room = req.room;
+
+    // Find next song based on room mode
+    let nextSong;
+    if (room.mode === 'democratic') {
+      // Get song with highest vote score
+      nextSong = await Song.findOne({
+        room: room._id,
+        status: SONG_STATUS.QUEUED
+      }).sort({ voteScore: -1, createdAt: 1 });
+    } else {
+      // Get oldest song (FIFO)
+      nextSong = await Song.findOne({
+        room: room._id,
+        status: SONG_STATUS.QUEUED
+      }).sort({ createdAt: 1 });
+    }
+
+    if (!nextSong) {
+      return res.status(404).json({
+        success: false,
+        message: 'No songs in queue'
+      });
+    }
+
+    // Mark current song as played if exists
+    if (room.currentSong) {
+      await Song.findByIdAndUpdate(room.currentSong, {
+        status: SONG_STATUS.PLAYED,
+        playedAt: new Date()
+      });
+    }
+
+    // Set next song as current
+    room.currentSong = nextSong._id;
+    room.playbackState.isPlaying = true;
+    room.playbackState.position = 0;
+    await room.save();
+
+    const populatedRoom = await Room.findById(room._id)
+      .populate('host', 'name email avatarUrl')
+      .populate('members.user', 'name email avatarUrl')
+      .populate('currentSong');
+
+    // Emit socket event
+    const io = req.app.get('io');
+    if (io) {
+      io.to(room._id.toString()).emit('song-started', {
+        room: populatedRoom
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Playing next song',
+      data: populatedRoom
+    });
+  } catch (error) {
+    next(error);
+  }
+};

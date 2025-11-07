@@ -20,10 +20,16 @@ export const API_ENDPOINTS = {
   
   // Songs
   ADD_SONG: (roomId: string) => `/api/rooms/${roomId}/songs`,
+  PLAY_NEXT_SONG: (roomId: string) => `/api/rooms/${roomId}/songs/play-next`,
   UPVOTE_SONG: (roomId: string, songId: string) => `/api/rooms/${roomId}/songs/${songId}/upvote`,
   DOWNVOTE_SONG: (roomId: string, songId: string) => `/api/rooms/${roomId}/songs/${songId}/downvote`,
   SKIP_SONG: (roomId: string, songId: string) => `/api/rooms/${roomId}/songs/${songId}/skip`,
   REMOVE_SONG: (roomId: string, songId: string) => `/api/rooms/${roomId}/songs/${songId}`,
+  
+  // Spotify
+  SPOTIFY_SEARCH: '/api/spotify/search',
+  SPOTIFY_TRACK: (trackId: string) => `/api/spotify/track/${trackId}`,
+  SPOTIFY_RECOMMENDATIONS: (trackId: string) => `/api/spotify/recommendations/${trackId}`,
 };
 
 export const SOCKET_EVENTS = {

@@ -5,10 +5,11 @@ const {
   upvoteSong,
   downvoteSong,
   skipSong,
-  removeSong
+  removeSong,
+  playNextSong
 } = require('../controllers/songController');
 const { protect } = require('../middleware/auth');
-const { checkRoomMember } = require('../middleware/roomAuth');
+const { checkRoomMember, checkRoomHost } = require('../middleware/roomAuth');
 const validate = require('../middleware/validate');
 
 const router = express.Router({ mergeParams: true });
@@ -24,6 +25,7 @@ const addSongValidation = [
 
 // Routes
 router.post('/', protect, checkRoomMember, addSongValidation, addSong);
+router.post('/play-next', protect, checkRoomHost, playNextSong);
 router.post('/:songId/upvote', protect, checkRoomMember, upvoteSong);
 router.post('/:songId/downvote', protect, checkRoomMember, downvoteSong);
 router.post('/:songId/skip', protect, checkRoomMember, skipSong);
