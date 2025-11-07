@@ -64,10 +64,24 @@ export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
             if (event.data === YT.PlayerState.PLAYING) {
               console.log("▶️ Video is PLAYING");
               setIsPlaying(true);
-              // Get duration from the player object, not the event target
-              const videoDuration = playerRef.current?.getDuration() || 0;
-              console.log("Duration:", videoDuration);
-              setDuration(videoDuration);
+              // Get duration from the player object, with retry logic
+              const getDurationWithRetry = () => {
+                const videoDuration = playerRef.current?.getDuration() || 0;
+                console.log("Duration:", videoDuration);
+                if (videoDuration > 0) {
+                  setDuration(videoDuration);
+                } else {
+                  // Retry after a short delay if duration not yet available
+                  setTimeout(() => {
+                    const retryDuration = playerRef.current?.getDuration() || 0;
+                    console.log("Duration (retry):", retryDuration);
+                    if (retryDuration > 0) {
+                      setDuration(retryDuration);
+                    }
+                  }, 500);
+                }
+              };
+              getDurationWithRetry();
               startProgressTracking();
             } else if (event.data === YT.PlayerState.PAUSED) {
               console.log("⏸️ Video is PAUSED");
@@ -76,8 +90,11 @@ export const useYouTubePlayer = (isHost: boolean, roomId: string) => {
             } else if (event.data === YT.PlayerState.ENDED) {
               console.log("⏹️ Video ENDED - Triggering autoplay");
               setIsPlaying(false);
+              setCurrentTime(0);
+              setDuration(0);
               stopProgressTracking();
-              // Trigger autoplay event
+              // Dispatch autoplay event immediately
+              console.log("📢 Dispatching youtube-song-ended event");
               const autoplayEvent = new CustomEvent("youtube-song-ended", {
                 detail: { roomId },
               });

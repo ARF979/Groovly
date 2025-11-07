@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import api, { handleApiError } from "@/lib/api";
@@ -342,34 +342,50 @@ function NowPlaying({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
+  const songEndedHandledRef = useRef(false);
+
+  // Define handlePlayNext before using it in effects
+  const handlePlayNext = useCallback(async () => {
+    try {
+      await api.post(API_ENDPOINTS.PLAY_NEXT_SONG(room._id));
+      // Room will be updated via socket event
+    } catch (error) {
+      console.error("Failed to play next song:", error);
+      const err = error as { response?: { data?: { message?: string } } };
+      alert(err.response?.data?.message || "Failed to start playing");
+    }
+  }, [room._id]);
+
+  // Reset songEndedHandled when song changes
+  useEffect(() => {
+    songEndedHandledRef.current = false;
+  }, [currentSong?._id]);
 
   // Autoplay handler - when a song ends, play the next one
   useEffect(() => {
     if (!isHost) return;
 
-    const handleSongEnded = async (event: any) => {
-      if (event.detail.roomId === room._id) {
-        console.log(
-          "🎵 Song ended, fetching updated queue and autoplaying next song..."
-        );
-        // Fetch latest queue to get updated votes before playing next
+    const handleSongEnded = async (event: Event) => {
+      const customEvent = event as CustomEvent<{ roomId: string }>;
+      if (
+        customEvent.detail.roomId === room._id &&
+        !songEndedHandledRef.current
+      ) {
+        songEndedHandledRef.current = true;
+        console.log("🎵 Song ended, autoplaying next song...");
+
         try {
+          // Fetch latest queue and play next immediately
           await fetchQueue();
-          // Wait for queue state to update, then play next
-          setTimeout(() => {
-            if (queue.length > 0) {
-              console.log("Triggering autoplay for next song");
-              handlePlayNext();
-            } else {
-              console.log("No more songs in queue");
-            }
-          }, 1500);
+          await handlePlayNext();
         } catch (err) {
-          console.error("Error fetching queue for autoplay:", err);
-          // Fallback: try to play next anyway
-          setTimeout(() => {
-            handlePlayNext();
-          }, 1500);
+          console.error("Error in autoplay:", err);
+          // Retry once
+          try {
+            await handlePlayNext();
+          } catch (retryErr) {
+            console.error("Retry failed:", retryErr);
+          }
         }
       }
     };
@@ -379,7 +395,7 @@ function NowPlaying({
     return () => {
       window.removeEventListener("youtube-song-ended", handleSongEnded);
     };
-  }, [isHost, room._id, queue.length, fetchQueue]);
+  }, [isHost, room._id, fetchQueue, handlePlayNext]);
 
   // Play song with YouTube when it changes
   useEffect(() => {
@@ -387,11 +403,14 @@ function NowPlaying({
 
     if (currentSong.youtubeId) {
       console.log("Playing with YouTube:", currentSong.youtubeId);
+      // Reset time and duration for new song
+      setCurrentTime(0);
+      setDuration(0);
       youtubePlayer.playVideo(currentSong.youtubeId, 0);
     }
-  }, [currentSong?.youtubeId, isHost, youtubePlayer.isReady]);
+  }, [currentSong?._id, isHost, youtubePlayer.isReady]);
 
-  // Sync YouTube player state with proper duration handling
+  // Sync YouTube player state - always update to stay in sync
   useEffect(() => {
     if (!isHost || !youtubePlayer.isReady) return;
 
@@ -400,16 +419,12 @@ function NowPlaying({
       setCurrentTime(youtubePlayer.currentTime);
     }
 
-    // Only update duration if it's valid and significantly different
-    if (
-      youtubePlayer.duration > 0 &&
-      Math.abs(duration - youtubePlayer.duration) > 1
-    ) {
-      console.log("Updating duration:", youtubePlayer.duration);
+    // Always update duration when it's valid
+    if (youtubePlayer.duration > 0) {
       setDuration(youtubePlayer.duration);
     }
 
-    // Broadcast to members only with valid duration
+    // Broadcast to members when valid
     if (isHost && youtubePlayer.duration > 0) {
       socketService.emit("playback-update", {
         roomId: room._id,
@@ -425,14 +440,17 @@ function NowPlaying({
     isHost,
     room._id,
     isDraggingSlider,
-    duration,
   ]);
 
   // Listen for playback updates from host (ONLY for members)
   useEffect(() => {
     if (isHost) return; // Host doesn't need to listen
 
-    const handlePlaybackUpdate = (data: any) => {
+    const handlePlaybackUpdate = (data: {
+      duration: number;
+      currentTime: number;
+      isPlaying: boolean;
+    }) => {
       setDuration(data.duration);
       if (!isDraggingSlider) {
         setCurrentTime(data.currentTime);
@@ -516,16 +534,6 @@ function NowPlaying({
     }
   };
 
-  const handlePlayNext = async () => {
-    try {
-      const response = await api.post(API_ENDPOINTS.PLAY_NEXT_SONG(room._id));
-      // Room will be updated via socket event
-    } catch (error: any) {
-      console.error("Failed to play next song:", error);
-      alert(error.response?.data?.message || "Failed to start playing");
-    }
-  };
-
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
     setCurrentTime(newTime);
@@ -535,16 +543,15 @@ function NowPlaying({
     setIsDraggingSlider(true);
   };
 
-  const handleSliderMouseUp = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSliderMouseUp = () => {
     setIsDraggingSlider(false);
-    const newTime = parseFloat(e.target.value);
 
     if (isHost && youtubePlayer.isReady) {
-      youtubePlayer.seek(newTime);
+      youtubePlayer.seek(currentTime);
       socketService.emit("playback-update", {
         roomId: room._id,
         duration: youtubePlayer.duration,
-        currentTime: newTime,
+        currentTime: currentTime,
         isPlaying: youtubePlayer.isPlaying,
       });
     }
@@ -628,11 +635,12 @@ function NowPlaying({
           {/* Audio Progress Bar with Slider */}
           <div className="mb-4">
             <input
+              key={`slider-${currentSong._id}`}
               type="range"
               min="0"
               max={duration || 0}
               step="0.1"
-              value={currentTime}
+              value={currentTime || 0}
               onChange={handleSliderChange}
               onMouseDown={handleSliderMouseDown}
               onMouseUp={handleSliderMouseUp}
@@ -642,9 +650,9 @@ function NowPlaying({
               className="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer slider mb-2"
               style={{
                 background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${
-                  duration ? (currentTime / duration) * 100 : 0
+                  duration > 0 ? ((currentTime || 0) / duration) * 100 : 0
                 }%, #374151 ${
-                  duration ? (currentTime / duration) * 100 : 0
+                  duration > 0 ? ((currentTime || 0) / duration) * 100 : 0
                 }%, #374151 100%)`,
               }}
             />
