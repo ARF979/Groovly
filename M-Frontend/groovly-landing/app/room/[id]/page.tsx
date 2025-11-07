@@ -613,6 +613,7 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState('');
   const [selectedTrack, setSelectedTrack] = useState<any>(null);
+  const [showOnlyWithPreview, setShowOnlyWithPreview] = useState(false);
 
   // Search Spotify
   const handleSearch = async () => {
@@ -715,16 +716,29 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
             </button>
           </div>
           <p className="text-xs text-muted mt-2">
-            🎵 Search by song title, artist, or album
+            🎵 Search by song title, artist, or album. Not all songs have 30-second previews available.
           </p>
         </div>
 
         {/* Search Results */}
         {searchResults.length > 0 && (
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-white">Search Results</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Search Results</h3>
+              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showOnlyWithPreview}
+                  onChange={(e) => setShowOnlyWithPreview(e.target.checked)}
+                  className="rounded border-white/20 bg-black/40 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                />
+                Only show playable songs
+              </label>
+            </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {searchResults.map((track) => (
+              {searchResults
+                .filter(track => !showOnlyWithPreview || track.previewUrl)
+                .map((track) => (
                 <div
                   key={track.spotifyId}
                   className="flex items-center gap-4 p-3 rounded-lg bg-black/40 border border-white/10 hover:border-purple-500/50 transition group"
@@ -737,7 +751,19 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
                     />
                   )}
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-white font-medium truncate">{track.title}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-white font-medium truncate">{track.title}</h4>
+                      {!track.previewUrl && (
+                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full whitespace-nowrap">
+                          No Preview
+                        </span>
+                      )}
+                      {track.explicit && (
+                        <span className="text-xs bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded-full">
+                          E
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted truncate">{track.artist}</p>
                     <p className="text-xs text-muted truncate">{track.album}</p>
                   </div>
@@ -758,6 +784,27 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
         {!isSearching && searchQuery && searchResults.length === 0 && (
           <div className="text-center py-8">
             <div className="text-muted">No results found. Try a different search.</div>
+          </div>
+        )}
+
+        {/* Suggestions when no search */}
+        {!searchQuery && searchResults.length === 0 && (
+          <div className="space-y-4">
+            <div className="rounded-lg bg-purple-500/10 border border-purple-500/20 p-4">
+              <h3 className="text-white font-semibold mb-2">💡 Tip: Finding Playable Songs</h3>
+              <p className="text-sm text-muted mb-3">
+                Not all songs have 30-second previews. Popular mainstream songs usually work best!
+              </p>
+              <div className="text-sm text-white/80">
+                <p className="font-medium mb-1">Try searching for:</p>
+                <ul className="list-disc list-inside space-y-1 text-muted">
+                  <li>"Blinding Lights" by The Weeknd</li>
+                  <li>"Shape of You" by Ed Sheeran</li>
+                  <li>"Levitating" by Dua Lipa</li>
+                  <li>"Bohemian Rhapsody" by Queen</li>
+                </ul>
+              </div>
+            </div>
           </div>
         )}
       </div>
