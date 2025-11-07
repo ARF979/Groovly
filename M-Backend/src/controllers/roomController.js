@@ -165,6 +165,14 @@ exports.leaveRoom = async (req, res, next) => {
     // Update user's active room
     await User.findByIdAndUpdate(req.user._id, { activeRoom: null });
 
+    // Emit socket event to notify other members
+    const io = req.app.get('io');
+    if (io) {
+      io.to(room._id.toString()).emit('member-left', {
+        user: req.user
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: 'Left room successfully'
@@ -180,6 +188,12 @@ exports.leaveRoom = async (req, res, next) => {
 exports.closeRoom = async (req, res, next) => {
   try {
     const room = req.room;
+
+    // Emit socket event to notify all members before closing
+    const io = req.app.get('io');
+    if (io) {
+      io.to(room._id.toString()).emit('room-closed');
+    }
 
     // Mark room as inactive
     room.isActive = false;

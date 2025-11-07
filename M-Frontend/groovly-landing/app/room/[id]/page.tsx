@@ -528,7 +528,14 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
     setError('');
 
     try {
-      await api.post(API_ENDPOINTS.ADD_SONG(roomId), songData);
+      // Auto-generate spotifyId if empty
+      const dataToSubmit = {
+        ...songData,
+        spotifyId: songData.spotifyId || `manual-${Date.now()}`,
+        album: songData.album || 'Unknown Album', // Ensure album is not empty
+      };
+      
+      await api.post(API_ENDPOINTS.ADD_SONG(roomId), dataToSubmit);
       onClose();
     } catch (err) {
       setError(handleApiError(err));
@@ -585,7 +592,7 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
 
           <div>
             <label className="block text-sm font-medium text-white mb-2">
-              Album
+              Album (optional)
             </label>
             <input
               type="text"
@@ -598,12 +605,12 @@ function AddSongModal({ roomId, onClose }: { roomId: string; onClose: () => void
 
           <div>
             <label className="block text-sm font-medium text-white mb-2">
-              Spotify ID (or any unique ID)
+              Spotify ID (optional - auto-generated if empty)
             </label>
             <input
               type="text"
               value={songData.spotifyId}
-              onChange={(e) => setSongData(prev => ({ ...prev, spotifyId: e.target.value || `manual-${Date.now()}` }))}
+              onChange={(e) => setSongData(prev => ({ ...prev, spotifyId: e.target.value }))}
               className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/10 text-white placeholder-muted focus:outline-none focus:ring-2 focus:ring-purple-500"
               placeholder="Leave blank for auto-generated ID"
             />

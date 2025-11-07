@@ -120,6 +120,14 @@ exports.upvoteSong = async (req, res, next) => {
     const populatedSong = await Song.findById(song._id)
       .populate('addedBy', 'name avatarUrl');
 
+    // Emit socket event to update song in real-time
+    const io = req.app.get('io');
+    if (io) {
+      io.to(req.room._id.toString()).emit('song-updated', {
+        song: populatedSong
+      });
+    }
+
     res.status(200).json({
       success: true,
       data: populatedSong
@@ -169,6 +177,14 @@ exports.downvoteSong = async (req, res, next) => {
 
     const populatedSong = await Song.findById(song._id)
       .populate('addedBy', 'name avatarUrl');
+
+    // Emit socket event to update song in real-time
+    const io = req.app.get('io');
+    if (io) {
+      io.to(req.room._id.toString()).emit('song-updated', {
+        song: populatedSong
+      });
+    }
 
     res.status(200).json({
       success: true,
