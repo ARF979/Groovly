@@ -141,7 +141,7 @@ roomSchema.methods.isHost = function(userId) {
 
 // Method to get member count
 roomSchema.virtual('memberCount').get(function() {
-  return this.members.length;
+  return this.members?.length || 0;
 });
 
 // Ensure virtuals are included in JSON

@@ -22,13 +22,21 @@ export default function Page() {
       <div className="relative z-10">
         {/* Navbar */}
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 md:px-10 lg:px-16">
-          <div className="text-lg font-semibold text-white">Welcome</div>
-          <Link
-            href="#"
-            className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-2 text-sm font-medium text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/30"
-          >
-            Login
-          </Link>
+          <div className="text-lg font-semibold text-white">Groovly</div>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 py-2 text-sm font-medium text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/30"
+            >
+              Login
+            </Link>
+            <Link
+              href="/auth/register"
+              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-2 text-sm font-medium text-white transition-all duration-200 hover:from-purple-600 hover:to-pink-600"
+            >
+              Sign Up
+            </Link>
+          </div>
         </nav>
         
         <header className="mx-auto flex max-w-7xl flex-col gap-16 px-6 pb-20 pt-12 md:px-10 lg:px-16">
@@ -158,16 +166,16 @@ export default function Page() {
             
             <div className="flex flex-col items-center justify-center gap-4 pt-6 sm:flex-row">
               <Link
-                href="#"
+                href="/auth/register"
                 className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-orange-400 px-8 py-3.5 font-semibold text-white shadow-lg shadow-pink-500/30 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-pink-500/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-400"
               >
-                Join waitlist
+                Get Started
               </Link>
               <Link
-                href="#"
+                href="/auth/login"
                 className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-8 py-3.5 font-semibold text-white/90 backdrop-blur-sm transition-all duration-200 hover:bg-white/10 hover:border-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-400"
               >
-                Watch demo
+                Sign In
               </Link>
             </div>
           </div>

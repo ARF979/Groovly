@@ -1,14 +1,12 @@
 const authRoutes = require("./authRoutes");
 const roomRoutes = require("./roomRoutes");
 const songRoutes = require("./songRoutes");
-const gameRoutes = require("../../Guess The Song/routes/gameRoutes");
 
 module.exports = (app) => {
   // API Routes
   app.use("/api/auth", authRoutes);
   app.use("/api/rooms", roomRoutes);
   app.use("/api/rooms/:roomId/songs", songRoutes);
-  app.use("/api/game", gameRoutes);
 
   // Health check
   app.get("/api/health", (req, res) => {
@@ -23,12 +21,11 @@ module.exports = (app) => {
   app.get("/", (req, res) => {
     res.status(200).json({
       success: true,
-      message: "DJ Party Mode & Guess The Song API",
+      message: "Groovly API - Collaborative Music Platform",
       version: "1.0.0",
       endpoints: {
         auth: "/api/auth",
         rooms: "/api/rooms",
-        game: "/api/game",
         health: "/api/health",
       },
     });

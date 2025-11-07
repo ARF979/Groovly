@@ -5,7 +5,6 @@ const createApp = require("./app");
 const connectDB = require("./config/database");
 const socketAuth = require("./socket/socketAuth");
 const setupSocketHandlers = require("./socket/socketHandlers");
-const setupGameSocketHandlers = require("../Guess The Song/socket/gameSocketHandlers");
 
 // Connect to database
 connectDB();
@@ -29,11 +28,8 @@ const io = new Server(server, {
 // Socket.io authentication middleware
 io.use(socketAuth);
 
-// Setup socket handlers for DJ/Party mode (default namespace)
+// Setup socket handlers
 setupSocketHandlers(io);
-
-// Setup socket handlers for Game mode (/game namespace)
-setupGameSocketHandlers(io);
 
 // Make io accessible to routes if needed
 app.set("io", io);
@@ -45,7 +41,7 @@ server.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║     DJ PARTY MODE BACKEND - COLLABORIFY                   ║
+║     GROOVLY BACKEND - Collaborative Music Platform        ║
 ║                                                            ║
 ║     Server running on port ${PORT}                           ║
 ║     Environment: ${
