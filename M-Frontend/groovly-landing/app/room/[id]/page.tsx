@@ -635,12 +635,11 @@ function NowPlaying({
           {/* Audio Progress Bar with Slider */}
           <div className="mb-4">
             <input
-              key={`slider-${currentSong._id}`}
               type="range"
               min="0"
-              max={duration || 0}
+              max={duration || 1}
               step="0.1"
-              value={currentTime || 0}
+              value={Math.min(currentTime, duration || 0)}
               onChange={handleSliderChange}
               onMouseDown={handleSliderMouseDown}
               onMouseUp={handleSliderMouseUp}
@@ -650,9 +649,9 @@ function NowPlaying({
               className="w-full h-2 bg-gray-700 rounded-full appearance-none cursor-pointer slider mb-2"
               style={{
                 background: `linear-gradient(to right, #a855f7 0%, #a855f7 ${
-                  duration > 0 ? ((currentTime || 0) / duration) * 100 : 0
+                  duration > 0 ? (currentTime / duration) * 100 : 0
                 }%, #374151 ${
-                  duration > 0 ? ((currentTime || 0) / duration) * 100 : 0
+                  duration > 0 ? (currentTime / duration) * 100 : 0
                 }%, #374151 100%)`,
               }}
             />
