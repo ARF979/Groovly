@@ -103,7 +103,7 @@ Built with modern web technologies and a focus on seamless user experience, Groo
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.webp" width="25px" /> Tech Stack
 
 ### Frontend
-* **Framework:** [Next.js 14](https://nextjs.org/) <img src="https://cdn.worldvectorlogo.com/logos/next-js.svg" alt="Next.js" width="24" height="24"/>
+* **Framework:** [Next.js 14](https://nextjs.org/) <img src="https://img.icons8.com/?size=1200&id=yUdJlcKanVbh&format=jpg" alt="Next.js" width="24" height="24"/>
 * **Language:** [TypeScript](https://www.typescriptlang.org/) <img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" alt="TypeScript" width="24" height="24"/>
 * **Styling:** [Tailwind CSS](https://tailwindcss.com/) <img src="https://cdn.worldvectorlogo.com/logos/tailwind-css-2.svg" alt="Tailwind CSS" width="24" height="24"/>
 * **Animations:** [Framer Motion](https://www.framer.com/motion/) <img src="https://user-images.githubusercontent.com/7850794/164965509-2a8dc49e-2ed7-4243-a2c9-481b03bbc31a.png" alt="Framer Motion" width="24" height="24"/>
@@ -111,7 +111,7 @@ Built with modern web technologies and a focus on seamless user experience, Groo
 
 ### Backend
 * **Runtime:** [Node.js](https://nodejs.org/) <img src="https://cdn.worldvectorlogo.com/logos/nodejs-icon.svg" alt="Node.js" width="24" height="24"/>
-* **Framework:** [Express](https://expressjs.com/) <img src="https://cdn.worldvectorlogo.com/logos/expressjs.svg" alt="Express" width="24" height="24"/>
+* **Framework:** [Express](https://expressjs.com/) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4T1YOdxe--UDu6VlEaqifJFs_dIXyiJUM0A&s" alt="Express" width="24" height="24"/>
 * **Database:** [MongoDB](https://www.mongodb.com/) <img src="https://cdn.worldvectorlogo.com/logos/mongodb-icon-1.svg" alt="MongoDB" width="24" height="24"/>
 * **Real-time:** [Socket.io](https://socket.io/) <img src="https://cdn.worldvectorlogo.com/logos/socket-io.svg" alt="Socket.io" width="24" height="24"/>
 * **Authentication:** [JWT](https://jwt.io/) <img src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/jwt-icon-138bxvrhijus263d2f2wur.png/jwt-icon-aqjx58uyj3lrxtborzgyg.png?_a=DATAg1AAZAA0" alt="Socket.io" width="24" height="24"/>
