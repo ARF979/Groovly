@@ -3,13 +3,10 @@
   <!-- Uncomment when banner is ready: -->
   <img src="M-Frontend/groovly-landing/public/assets/banner.png" alt="Groovly Banner" width="100%" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
 
-
 ![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
 
-
-
 <p align="center">
-   <b>Welcome to Groovly!</b> Transform any gathering into a collaborative concert with our real-time music collaboration platform. Whether it's a house party, road trip, or study session, Groovly lets everyone add songs, vote on the queue, and create the perfect shared soundtrack together! 🎵�✨
+   <b>Welcome to Groovly!</b> Transform any gathering into a collaborative concert with our real-time music collaboration platform. Whether it's a house party, road trip, or study session, Groovly lets everyone add songs, vote on the queue, and create the perfect shared soundtrack together! 🎶🎵✨
 </p>
 
 <p align="center">
@@ -26,20 +23,22 @@
 
 </div>
 
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![React](https://img.shields.io/badge/React-18+-blue?logo=react&logoColor=white)](https://reactjs.org/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![Next.js](https://img.shields.io/badge/Next.js-14+-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-18+-blue?logo=react&logoColor=white)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14+-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3+-cyan?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-  [![Node.js](https://img.shields.io/badge/Node.js-14+-green?logo=node.js&logoColor=white)](https://nodejs.org/)
-  [![Socket.io](https://img.shields.io/badge/Socket.io-4.6+-black?logo=socket.io&logoColor=white)](https://socket.io/)
-  [![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3+-cyan?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-14+-green?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-4.6+-black?logo=socket.io&logoColor=white)](https://socket.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+
 </div>
 
 ![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
 
 ---
+
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f31f/512.webp" width="25px" /> Overview
 
 Groovly is a real-time collaborative music experience platform that brings people together through shared soundtracks. Powered by WebSocket technology and seamless YouTube integration, Groovly creates instant party rooms where every guest becomes a DJ.
@@ -100,25 +99,29 @@ Built with modern web technologies and a focus on seamless user experience, Groo
 </table>
 
 ---
+
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2699_fe0f/512.webp" width="25px" /> Tech Stack
 
 ### Frontend
-* **Framework:** [Next.js 14](https://nextjs.org/) <img src="https://img.icons8.com/?size=1200&id=yUdJlcKanVbh&format=jpg" alt="Next.js" width="24" height="24"/>
-* **Language:** [TypeScript](https://www.typescriptlang.org/) <img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" alt="TypeScript" width="24" height="24"/>
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/) <img src="https://cdn.worldvectorlogo.com/logos/tailwind-css-2.svg" alt="Tailwind CSS" width="24" height="24"/>
-* **Animations:** [Framer Motion](https://www.framer.com/motion/) <img src="https://user-images.githubusercontent.com/7850794/164965509-2a8dc49e-2ed7-4243-a2c9-481b03bbc31a.png" alt="Framer Motion" width="24" height="24"/>
-* **State Management:** [Zustand](https://github.com/pmndrs/zustand) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpHj4UwTW4ANSlNjzQOiiOqfDa6kal9RpF0A&s" alt="Zustand" width="24" height="24"/>
+
+- **Framework:** [Next.js 14](https://nextjs.org/) <img src="https://img.icons8.com/?size=1200&id=yUdJlcKanVbh&format=jpg" alt="Next.js" width="24" height="24"/>
+- **Language:** [TypeScript](https://www.typescriptlang.org/) <img src="https://cdn.worldvectorlogo.com/logos/typescript.svg" alt="TypeScript" width="24" height="24"/>
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) <img src="https://cdn.worldvectorlogo.com/logos/tailwind-css-2.svg" alt="Tailwind CSS" width="24" height="24"/>
+- **Animations:** [Framer Motion](https://www.framer.com/motion/) <img src="https://user-images.githubusercontent.com/7850794/164965509-2a8dc49e-2ed7-4243-a2c9-481b03bbc31a.png" alt="Framer Motion" width="24" height="24"/>
+- **State Management:** [Zustand](https://github.com/pmndrs/zustand) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpHj4UwTW4ANSlNjzQOiiOqfDa6kal9RpF0A&s" alt="Zustand" width="24" height="24"/>
 
 ### Backend
-* **Runtime:** [Node.js](https://nodejs.org/) <img src="https://cdn.worldvectorlogo.com/logos/nodejs-icon.svg" alt="Node.js" width="24" height="24"/>
-* **Framework:** [Express](https://expressjs.com/) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4T1YOdxe--UDu6VlEaqifJFs_dIXyiJUM0A&s" alt="Express" width="24" height="24"/>
-* **Database:** [MongoDB](https://www.mongodb.com/) <img src="https://cdn.worldvectorlogo.com/logos/mongodb-icon-1.svg" alt="MongoDB" width="24" height="24"/>
-* **Real-time:** [Socket.io](https://socket.io/) <img src="https://cdn.worldvectorlogo.com/logos/socket-io.svg" alt="Socket.io" width="24" height="24"/>
-* **Authentication:** [JWT](https://jwt.io/) <img src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/jwt-icon-138bxvrhijus263d2f2wur.png/jwt-icon-aqjx58uyj3lrxtborzgyg.png?_a=DATAg1AAZAA0" alt="Socket.io" width="24" height="24"/>
+
+- **Runtime:** [Node.js](https://nodejs.org/) <img src="https://cdn.worldvectorlogo.com/logos/nodejs-icon.svg" alt="Node.js" width="24" height="24"/>
+- **Framework:** [Express](https://expressjs.com/) <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4T1YOdxe--UDu6VlEaqifJFs_dIXyiJUM0A&s" alt="Express" width="24" height="24"/>
+- **Database:** [MongoDB](https://www.mongodb.com/) <img src="https://cdn.worldvectorlogo.com/logos/mongodb-icon-1.svg" alt="MongoDB" width="24" height="24"/>
+- **Real-time:** [Socket.io](https://socket.io/) <img src="https://cdn.worldvectorlogo.com/logos/socket-io.svg" alt="Socket.io" width="24" height="24"/>
+- **Authentication:** [JWT](https://jwt.io/) <img src="https://assets.streamlinehq.com/image/private/w_300,h_300,ar_1/f_auto/v1/icons/4/jwt-icon-138bxvrhijus263d2f2wur.png/jwt-icon-aqjx58uyj3lrxtborzgyg.png?_a=DATAg1AAZAA0" alt="Socket.io" width="24" height="24"/>
 
 ### APIs & Services
-* **Video Platform:** [YouTube API](https://developers.google.com/youtube)
-* **HTTP Client:** [Axios](https://axios-http.com/)
+
+- **Video Platform:** [YouTube API](https://developers.google.com/youtube)
+- **HTTP Client:** [Axios](https://axios-http.com/)
 
 ---
 
@@ -127,6 +130,7 @@ Built with modern web technologies and a focus on seamless user experience, Groo
 Follow these steps to set up and run Groovly locally:
 
 ### Prerequisites
+
 - Node.js (v14 or higher)
 - MongoDB (local installation or MongoDB Atlas account)
 - npm or yarn
@@ -134,17 +138,20 @@ Follow these steps to set up and run Groovly locally:
 ### Backend Setup
 
 1.  **Navigate to backend directory:**
+
     ```bash
     cd M-Backend
     ```
 
 2.  **Install dependencies:**
+
     ```bash
     npm install
     ```
 
 3.  **Set up Environment Variables:**
     Create a `.env` file in the `M-Backend` directory:
+
     ```plaintext
     PORT=5000
     NODE_ENV=development
@@ -155,10 +162,11 @@ Follow these steps to set up and run Groovly locally:
     ```
 
 4.  **Start MongoDB:**
+
     ```bash
     # If using local MongoDB
     mongod
-    
+
     # Or use MongoDB Atlas connection string in MONGODB_URI
     ```
 
@@ -171,23 +179,27 @@ Follow these steps to set up and run Groovly locally:
 ### Frontend Setup
 
 1.  **Navigate to frontend directory:**
+
     ```bash
     cd M-Frontend/groovly-landing
     ```
 
 2.  **Install dependencies:**
+
     ```bash
     npm install
     ```
 
 3.  **Set up Environment Variables:**
     Create a `.env.local` file in the `groovly-landing` directory:
+
     ```plaintext
     NEXT_PUBLIC_API_URL=http://localhost:5000
     NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
     ```
 
 4.  **Run the development server:**
+
     ```bash
     npm run dev
     ```
@@ -202,6 +214,7 @@ Follow these steps to set up and run Groovly locally:
 4. Start adding songs and voting!
 
 For more detailed setup instructions, check out:
+
 - [Backend Quick Start Guide](M-Backend/QUICKSTART.md)
 - [Frontend Sitemap](M-Frontend/SITEMAP.md)
 
@@ -255,6 +268,7 @@ Contributions are welcome! If you'd like to contribute to Groovly, please follow
 Please ensure your code adheres to the project's coding standards and includes tests where applicable.
 
 ### Areas for Contribution
+
 - 🎮 New mini-games and interactive features
 - 🎨 UI/UX improvements and animations
 - 🔊 Audio visualization features
@@ -264,7 +278,7 @@ Please ensure your code adheres to the project's coding standards and includes t
 
 ---
 
-## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/270d_1f3fc/512.webp" width="25px" />  License
+## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/270d_1f3fc/512.webp" width="25px" /> License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -272,11 +286,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f64f_1f3fc/512.webp" width="25px" /> Acknowledgements
 
-* Built with [Socket.io](https://socket.io/) for seamless real-time communication
-* Music powered by [YouTube API](https://developers.google.com/youtube)
-* Beautiful animations courtesy of [Framer Motion](https://www.framer.com/motion/)
-* Inspired by the universal love of music and the joy of sharing experiences
-* Special thanks to all beta testers and party enthusiasts who helped shape Groovly
+- Built with [Socket.io](https://socket.io/) for seamless real-time communication
+- Music powered by [YouTube API](https://developers.google.com/youtube)
+- Beautiful animations courtesy of [Framer Motion](https://www.framer.com/motion/)
+- Inspired by the universal love of music and the joy of sharing experiences
+- Special thanks to all beta testers and party enthusiasts who helped shape Groovly
 
 ![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
 

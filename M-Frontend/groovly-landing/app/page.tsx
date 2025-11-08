@@ -248,7 +248,7 @@ export default function Page() {
         </section>
 
         {/* Animated Arrow CTA Buttons */}
-        <section className="relative mx-auto mt-32 mb-20 max-w-5xl px-6">
+        <section className="relative mx-auto mt-48 mb-20 max-w-5xl px-6">
           <div className="flex flex-col items-center justify-center gap-14">
             <h2 className="text-5xl md:text-6xl font-bold text-center bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
               Ready to Get Grooving?
@@ -267,14 +267,16 @@ export default function Page() {
                   color: "white",
                   background:
                     "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  transition: "1s",
+                  transition: "box-shadow 0.3s, transform 0.1s",
                   boxShadow: "6px 6px 0 rgba(0,0,0,0.3)",
                   transform: "skewX(-15deg)",
                   border: "none",
                   fontWeight: "900",
                   fontFamily: "Poppins, sans-serif",
                   letterSpacing: "1px",
-                  borderRadius: "8px",
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                  position: "relative",
                 }}
               >
                 <span
@@ -351,14 +353,16 @@ export default function Page() {
                   color: "white",
                   background:
                     "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-                  transition: "1s",
+                  transition: "box-shadow 0.3s, transform 0.1s",
                   boxShadow: "6px 6px 0 rgba(0,0,0,0.3)",
                   transform: "skewX(-15deg)",
                   border: "none",
                   fontWeight: "900",
                   fontFamily: "Poppins, sans-serif",
                   letterSpacing: "1px",
-                  borderRadius: "8px",
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                  position: "relative",
                 }}
               >
                 <span
