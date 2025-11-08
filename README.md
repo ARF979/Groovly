@@ -1,7 +1,7 @@
 <div align="center">
   <div align="center">
   <!-- Uncomment when banner is ready: -->
-  <img src="public/images/groovly_banner.png" alt="Groovly Banner" width="100%" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+  <img src="M-Frontend/groovly-landing/public/assets/banner.png" alt="Groovly Banner" width="100%" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
 
 
 ![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
