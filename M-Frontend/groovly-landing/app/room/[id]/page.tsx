@@ -234,20 +234,21 @@ export default function RoomPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {isHost && (
+                {isHost ? (
                   <button
                     onClick={handleCloseRoom}
                     className="px-4 py-2 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-500/10 transition"
                   >
                     Close Room
                   </button>
+                ) : (
+                  <button
+                    onClick={handleLeaveRoom}
+                    className="px-4 py-2 rounded-lg border border-white/20 text-white hover:bg-white/10 transition"
+                  >
+                    Leave Room
+                  </button>
                 )}
-                <button
-                  onClick={handleLeaveRoom}
-                  className="px-4 py-2 rounded-lg border border-white/20 text-white hover:bg-white/10 transition"
-                >
-                  Leave Room
-                </button>
               </div>
             </div>
           </div>
