@@ -194,7 +194,8 @@ export default function Page() {
                 Your Party, Your Playlist
               </h2>
               <p className="text-lg md:text-xl text-gray-300">
-                Every guest becomes a DJ. Vote, queue, and vibe together in real-time.
+                Every guest becomes a DJ. Vote, queue, and vibe together in
+                real-time.
               </p>
             </div>
 
@@ -204,12 +205,26 @@ export default function Page() {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="relative z-10">
                   <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg shadow-purple-500/50 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
-                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    <svg
+                      className="h-8 w-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                      />
                     </svg>
                   </div>
-                  <h3 className="mb-3 text-2xl font-bold text-white">Collaborative Queue</h3>
-                  <p className="text-gray-400 leading-relaxed">Add tracks together and build the perfect shared playlist.</p>
+                  <h3 className="mb-3 text-2xl font-bold text-white">
+                    Collaborative Queue
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Add tracks together and build the perfect shared playlist.
+                  </p>
                 </div>
                 <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-30" />
               </div>
@@ -219,12 +234,26 @@ export default function Page() {
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="relative z-10">
                   <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-rose-700 shadow-lg shadow-pink-500/50 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
-                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                    <svg
+                      className="h-8 w-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                      />
                     </svg>
                   </div>
-                  <h3 className="mb-3 text-2xl font-bold text-white">Democratic Voting</h3>
-                  <p className="text-gray-400 leading-relaxed">Upvote favorites. The crowd decides what plays next.</p>
+                  <h3 className="mb-3 text-2xl font-bold text-white">
+                    Democratic Voting
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Upvote favorites. The crowd decides what plays next.
+                  </p>
                 </div>
                 <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-pink-600 via-rose-600 to-pink-600 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-30" />
               </div>
@@ -234,12 +263,26 @@ export default function Page() {
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="relative z-10">
                   <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 shadow-lg shadow-orange-500/50 transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
-                    <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <svg
+                      className="h-8 w-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="mb-3 text-2xl font-bold text-white">Real-Time Sync</h3>
-                  <p className="text-gray-400 leading-relaxed">Instant updates. See votes and changes as they happen.</p>
+                  <h3 className="mb-3 text-2xl font-bold text-white">
+                    Real-Time Sync
+                  </h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Instant updates. See votes and changes as they happen.
+                  </p>
                 </div>
                 <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-orange-600 via-red-600 to-orange-600 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-30" />
               </div>

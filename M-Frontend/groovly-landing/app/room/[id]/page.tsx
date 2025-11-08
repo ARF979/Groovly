@@ -8,6 +8,7 @@ import socketService from "@/lib/socket";
 import { API_ENDPOINTS, SOCKET_EVENTS } from "@/config/constants";
 import { Room, Song, User } from "@/types";
 import { useYouTubePlayer } from "@/hooks/useYouTubePlayer";
+import Link from "next/link";
 
 export default function RoomPage() {
   const router = useRouter();
@@ -214,23 +215,33 @@ export default function RoomPage() {
         <header className="border-b border-white/10 bg-black/50 backdrop-blur-sm">
           <div className="mx-auto max-w-7xl px-6 py-4">
             <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-white">{room.name}</h1>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-sm text-muted">
-                    Code:{" "}
-                    <span className="font-mono text-purple-400">
-                      {room.code}
+              <div className="flex items-center gap-6">
+                <Link href="/dashboard">
+                  <img
+                    src="/assets/logo_with_name.png"
+                    alt="Groovly"
+                    className="h-10 cursor-pointer hover:opacity-80 transition"
+                  />
+                </Link>
+                <div className="h-8 w-px bg-white/20"></div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">{room.name}</h1>
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="text-sm text-muted">
+                      Code:{" "}
+                      <span className="font-mono text-purple-400">
+                        {room.code}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-sm text-muted">•</span>
-                  <span className="text-sm text-muted capitalize">
-                    {room.mode.replace("-", " ")}
-                  </span>
-                  <span className="text-sm text-muted">•</span>
-                  <span className="text-sm text-muted">
-                    {room.members.length} members
-                  </span>
+                    <span className="text-sm text-muted">•</span>
+                    <span className="text-sm text-muted capitalize">
+                      {room.mode.replace("-", " ")}
+                    </span>
+                    <span className="text-sm text-muted">•</span>
+                    <span className="text-sm text-muted">
+                      {room.members.length} members
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
