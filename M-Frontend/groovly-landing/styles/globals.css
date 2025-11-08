@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url("https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,600;0,700;0,800;0,900;1,900&display=swap");
 
 :root {
   color-scheme: dark;
@@ -10,6 +11,16 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 body {
@@ -17,6 +28,30 @@ body {
   background-color: #000000;
   font-family: var(--font-body, "Inter", system-ui, sans-serif);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Global scrollbar hiding for all elements */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+body {
   background-image: radial-gradient(
       ellipse at top,
       rgba(139, 92, 246, 0.08),
@@ -58,8 +93,102 @@ a {
   }
 }
 
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes arrowColorAnim {
+  0% {
+    fill: white;
+  }
+  50% {
+    fill: #fbbf24;
+  }
+  100% {
+    fill: white;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
 .font-handwriting {
   font-family: "Permanent Marker", cursive;
+}
+
+/* CTA Button Styles */
+.cta-button:focus {
+  outline: none;
+}
+
+.cta-button:hover {
+  transition: 0.5s;
+  box-shadow: 10px 10px 0 #fbbf24 !important;
+}
+
+.cta-button:hover .arrow-container {
+  transition: 0.5s;
+  margin-left: 45px !important;
+}
+
+.cta-button:hover .arrow-path-three {
+  animation: arrowColorAnim 1s infinite 0.2s;
+}
+
+.cta-button:hover .arrow-path-one {
+  transform: translateX(0%) !important;
+  animation: arrowColorAnim 1s infinite 0.6s;
+}
+
+.cta-button:hover .arrow-path-two {
+  transform: translateX(0%) !important;
+  animation: arrowColorAnim 1s infinite 0.4s;
 }
 
 /* Custom slider styles */

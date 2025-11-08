@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Inter, Poppins, Lato, Imperial_Script, Quicksand } from "next/font/google";
+import {
+  Inter,
+  Poppins,
+  Lato,
+  Imperial_Script,
+  Quicksand,
+} from "next/font/google";
 import "../styles/globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["600", "700", "800", "900"],
   variable: "--font-display",
+  style: ["normal", "italic"],
 });
 const lato = Lato({
   subsets: ["latin"],
@@ -25,13 +32,24 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "Groovly — Collaborative Music for Every Gathering",
-  description: "Groovly lets every guest add, vote, and vibe. Build collaborative playlists for any party, trip, or hangout.",
+  title: "Groovly",
+  description:
+    "Groovly lets every guest add, vote, and vibe. Build collaborative playlists for any party, trip, or hangout.",
+  icons: {
+    icon: "/assets/logo.png",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${inter.variable} ${poppins.variable} ${lato.variable} ${imperialScript.variable} ${quicksand.variable}`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${poppins.variable} ${lato.variable} ${imperialScript.variable} ${quicksand.variable}`}
+    >
       <head>
         <script src="https://www.youtube.com/iframe_api" async></script>
       </head>

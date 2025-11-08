@@ -41,16 +41,16 @@ server.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║                                                            ║
-║     GROOVLY BACKEND - Collaborative Music Platform        ║
+║     GROOVLY BACKEND - Collaborative Music Platform         ║
 ║                                                            ║
-║     Server running on port ${PORT}                           ║
+║     Server running on port ${PORT}                            ║
 ║     Environment: ${
     process.env.NODE_ENV || "development"
-  }                            ║
+  }                               ║
 ║     Socket.io: Enabled                                     ║
 ║                                                            ║
-║     API Docs: http://localhost:${PORT}/                      ║
-║     Health: http://localhost:${PORT}/api/health              ║
+║     API Docs: http://localhost:${PORT}/                       ║
+║     Health: http://localhost:${PORT}/api/health               ║
 ║                                                            ║
 ╚════════════════════════════════════════════════════════════╝
   `);
