@@ -295,7 +295,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ![Line](https://user-images.githubusercontent.com/85225156/171937799-8fc9e255-9889-4642-9c92-6df85fb86e82.gif)
 
 <div align="center">
-  <p>Made with <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9e1/512.webp" width="17px" /> and lots of <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f35d/512.webp" width="19px" /> <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2615/512.webp" width="19px" /> by <code> Sushmit Biswas </code> and <code> Abdul Farooqui </code> </p>
+  <p>Made with <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f9e1/512.webp" width="17px" /> and lots of <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f35d/512.webp" width="19px" /> <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2615/512.webp" width="19px" /> by <code>Sushmit Biswas</code> and <code>Abdul Farooqui</code></p>
   
   
   <h3>Let's Groovly Together!</h3>
